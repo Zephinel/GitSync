@@ -45,7 +45,7 @@
   },
   "plugins": {
     "updater": {
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEU4RDEwNTc4REM4MjdGNzEKUldSeGY0TGNlQVhSNk9FakEzbU9FNjJNNUdHNHQyTWR0dTJ0bkRJUEdQODh2dWxnTkIwSjJrMUMK",
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEMxRTU0RDM3Qjg0M0Y5RjMKUldUeitVTzROMDNsd1o2TkRqR01lZUZLMG1aRkxMc1pGWmtiWGJMYWV2bEdyRmxESlk1Z05nS0IK",
       "requireSignedVersion": true,
       "endpoints": [
         "https://github.com/Zephinel/GitSync/releases/latest/download/latest.json"
