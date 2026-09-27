@@ -3,6 +3,7 @@ import { test } from 'node:test'
 import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import { spawnSync } from 'node:child_process'
+import { createHash } from 'node:crypto'
 import os from 'node:os'
 import path from 'node:path'
 import {
@@ -132,6 +133,7 @@ test('draft and published Release validation requires the exact uploaded asset s
         name,
         size: 11,
         state: 'uploaded',
+        digest: 'sha256:' + createHash('sha256').update('asset bytes').digest('hex'),
       })),
     }
     const manifest = buildUpdaterManifest(inputs)
@@ -142,6 +144,9 @@ test('draft and published Release validation requires the exact uploaded asset s
       expectedDraft: true,
       release: { ...release, assets: release.assets.slice(1) },
     }), /asset count/)
+    await writeFile(path.join(directory, 'windows', 'GitSync.exe'), 'other bytes')
+    await assert.rejects(validateReleaseState({ ...args, expectedDraft: true }), /digest does not match: GitSync.exe/)
+    await writeFile(path.join(directory, 'windows', 'GitSync.exe'), 'asset bytes')
     const published = { ...release, draft: false }
     assert.equal(await validateReleaseState({
       ...args,

@@ -1,0 +1,129 @@
+name: Recover Draft Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing draft Release tag
+        required: true
+        type: string
+      failed_run_id:
+        description: Failed Release on Tag run with completed build artifacts
+        required: true
+        type: string
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+permissions:
+  contents: read
+
+jobs:
+  recover:
+    name: Verify and publish existing draft
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: write
+    steps:
+      - name: Checkout recovery code
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: "22"
+
+      - name: Setup Rust for signature verification
+        uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87 # stable
+
+      - name: Install release script dependencies
+        run: npm ci
+
+      - name: Verify failed run and download its bundles
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ inputs.tag }}
+          FAILED_RUN_ID: ${{ inputs.failed_run_id }}
+        run: |
+          set -euo pipefail
+          if [ "${GH_REPO}" != "Zephinel/GitSync" ] || [ "${GITHUB_REF}" != "refs/heads/main" ]; then
+            echo "::error::Recovery must run from Zephinel/GitSync main."
+            exit 1
+          fi
+          app_version="$(jq -r '.version' src-tauri/tauri.conf.json)"
+          if [ "${TAG}" != "v${app_version}" ] || ! [[ "${FAILED_RUN_ID}" =~ ^[1-9][0-9]*$ ]]; then
+            echo "::error::Recovery tag or run ID is invalid for this checkout."
+            exit 1
+          fi
+
+          gh api "/repos/${GH_REPO}/actions/runs/${FAILED_RUN_ID}" > failed-run.json
+          jq -e --arg tag "${TAG}" '
+            .status == "completed" and .conclusion == "failure" and
+            .event == "push" and .head_branch == $tag and
+            .path == ".github/workflows/release-on-tag.yml"
+          ' failed-run.json >/dev/null
+          expected_sha="$(jq -r '.head_sha' failed-run.json)"
+          EXPECTED_GITHUB_SHA="${expected_sha}" GITHUB_TOKEN="${GH_TOKEN}" \
+            GITHUB_REPOSITORY="${GH_REPO}" node scripts/verify-release-tag-identity.mjs >/dev/null
+
+          gh api "/repos/${GH_REPO}/actions/runs/${FAILED_RUN_ID}/artifacts" > run-artifacts.json
+          jq -e '
+            [.artifacts[] | select(.expired == false) | .name] | sort ==
+            ["release-macos-dmg", "release-windows-bundles"]
+          ' run-artifacts.json >/dev/null
+          gh run download "${FAILED_RUN_ID}" --repo "${GH_REPO}" \
+            --pattern 'release-*' --dir release-assets
+
+      - name: Verify draft assets and publish
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          TAG: ${{ inputs.tag }}
+          FAILED_RUN_ID: ${{ inputs.failed_run_id }}
+        run: |
+          set -euo pipefail
+          export APP_VERSION="$(jq -r '.version' src-tauri/tauri.conf.json)"
+          release_id="$(gh release view "${TAG}" --repo "${GH_REPO}" --json databaseId --jq .databaseId)"
+          release_state=release-assets/remote-release.json
+          gh api "/repos/${GH_REPO}/releases/${release_id}" > "${release_state}"
+          jq -e --arg tag "${TAG}" '.tag_name == $tag and .prerelease == false and (.assets | length) == 7' \
+            "${release_state}" >/dev/null
+
+          manifest_asset_id="$(jq -r '[.assets[] | select(.name == "latest.json")] | if length == 1 then .[0].id else error("missing latest.json") end' "${release_state}")"
+          node scripts/download-release-asset.mjs "${manifest_asset_id}" release-assets/latest.json
+
+          mapfile -t mac_bundles < <(find release-assets -type f -name 'GitSync.app.tar.gz')
+          mapfile -t windows_bundles < <(find release-assets -type f -name 'GitSync-setup.exe')
+          if [ "${#mac_bundles[@]}" -ne 1 ] || [ "${#windows_bundles[@]}" -ne 1 ]; then
+            echo "::error::Expected exactly one updater bundle per platform."
+            exit 1
+          fi
+          pubkey="$(jq -r '.plugins.updater.pubkey' src-tauri/tauri.conf.json)"
+          for bundle in "${mac_bundles[0]}" "${windows_bundles[0]}"; do
+            cargo run --quiet --locked \
+              --manifest-path scripts/updater-signature-verifier/Cargo.toml \
+              -- "${pubkey}" "${bundle}" "${bundle}.sig"
+          done
+          mac_signature="$(tr -d '\r\n' < "${mac_bundles[0]}.sig")"
+          windows_signature="$(tr -d '\r\n' < "${windows_bundles[0]}.sig")"
+          jq -e --arg mac "${mac_signature}" --arg windows "${windows_signature}" '
+            .platforms["darwin-aarch64"].signature == $mac and
+            .platforms["windows-x86_64"].signature == $windows
+          ' release-assets/latest.json >/dev/null
+
+          if jq -e '.draft == true' "${release_state}" >/dev/null; then
+            node scripts/validate-release-state.mjs "${release_state}" draft release-assets
+            gh api --method PATCH "/repos/${GH_REPO}/releases/${release_id}" -F draft=false >/dev/null
+          fi
+          gh api "/repos/${GH_REPO}/releases/${release_id}" > "${release_state}"
+          node scripts/validate-release-state.mjs "${release_state}" published release-assets
+          curl --fail --location --silent --show-error \
+            --retry 6 --retry-all-errors --retry-delay 5 --max-time 30 \
+            "https://github.com/${GH_REPO}/releases/latest/download/latest.json" \
+            --output release-assets/latest-public.json
+          cmp release-assets/latest.json release-assets/latest-public.json

@@ -382,9 +382,11 @@ jobs:
 
           jq -r '.notes' release-assets/latest.json > release-notes.md
           release_state=release-assets/remote-release.json
-          if gh api "/repos/${GH_REPO}/releases/tags/${TAG}" > "${release_state}" 2>/dev/null; then
+          release_id="$(gh release view "${TAG}" --repo "${GH_REPO}" --json databaseId --jq .databaseId 2>/dev/null || true)"
+          if [ -n "${release_id}" ]; then
+            gh api "/repos/${GH_REPO}/releases/${release_id}" > "${release_state}"
             if ! jq -e '.draft == true and (.assets | length) == 0' "${release_state}" >/dev/null; then
-              echo "::error::Release already exists with assets or is published; refusing to overwrite it."
+              echo "::error::Release already has assets or is published; use the draft recovery workflow instead of overwriting it."
               exit 1
             fi
             gh release edit "${TAG}" --repo "${GH_REPO}" \
@@ -393,11 +395,12 @@ jobs:
             gh release create "${TAG}" --repo "${GH_REPO}" \
               --verify-tag --draft --title "GitSync ${TAG}" \
               --notes-file release-notes.md
+            release_id="$(gh release view "${TAG}" --repo "${GH_REPO}" --json databaseId --jq .databaseId)"
           fi
 
           verify_tag_identity
           gh release upload "${TAG}" --repo "${GH_REPO}" "${assets[@]}"
-          gh api "/repos/${GH_REPO}/releases/tags/${TAG}" > "${release_state}"
+          gh api "/repos/${GH_REPO}/releases/${release_id}" > "${release_state}"
           node scripts/validate-release-state.mjs "${release_state}" draft release-assets
 
           manifest_asset_id="$(
@@ -407,7 +410,6 @@ jobs:
           cmp release-assets/latest.json release-assets/latest-remote.json
 
           verify_tag_identity
-          release_id="$(jq -r '.id' "${release_state}")"
           gh api --method PATCH "/repos/${GH_REPO}/releases/${release_id}" \
             -F draft=false >/dev/null
           gh api "/repos/${GH_REPO}/releases/${release_id}" > "${release_state}"

@@ -1,4 +1,5 @@
 import { readFile, readdir, stat } from 'node:fs/promises'
+import { createHash } from 'node:crypto'
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { validateUpdaterManifest } from './updater-manifest.mjs'
@@ -75,6 +76,12 @@ export async function validateReleaseState({
     const localSize = (await stat(localFiles.get(asset.name))).size
     if (!Number.isSafeInteger(asset.id) || asset.id < 1 || asset.size !== localSize || localSize < 1) {
       throw new Error('Release asset identity or size does not match: ' + asset.name)
+    }
+    const localDigest = 'sha256:' + createHash('sha256')
+      .update(await readFile(localFiles.get(asset.name)))
+      .digest('hex')
+    if (asset.digest !== localDigest) {
+      throw new Error('Release asset digest does not match: ' + asset.name)
     }
     seen.add(asset.name)
   }
