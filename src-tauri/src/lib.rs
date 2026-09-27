@@ -145,6 +145,7 @@ pub fn run() {
             ai::commands::cancel_ai_request,
             commands::github_start_device_auth,
             commands::github_poll_token,
+            commands::github_cancel_device_auth,
             commands::github_get_account,
             commands::github_get_repos,
             commands::github_logout,

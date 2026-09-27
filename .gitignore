@@ -31,4 +31,5 @@ github_client_id
 *.p12
 *.key
 release-assets/
+scripts/updater-signature-verifier/target/
 .pi-subagents/

@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises'
+import { existsSync } from 'node:fs'
+import { spawnSync } from 'node:child_process'
 import os from 'node:os'
 import path from 'node:path'
 import {
@@ -37,6 +39,39 @@ const builtTargets = {
   'windows-x86_64': 'windows-x86_64',
 }
 const inputs = { files, signatures, builtTargets, version, tag, repository, pubDate, notes: 'First public release' }
+
+test('manifest creation rejects a forged trusted comment before publication', async () => {
+  const directory = await mkdtemp(path.join(os.tmpdir(), 'gitsync-forged-updater-'))
+  try {
+    for (const [target, definition] of Object.entries({
+      macos: { bundle: 'GitSync.app.tar.gz', marker: 'updater-build-target-darwin-aarch64.txt', value: 'darwin-aarch64' },
+      windows: { bundle: 'GitSync-setup.exe', marker: 'updater-build-target-windows-x86_64.txt', value: 'windows-x86_64' },
+    })) {
+      const folder = path.join(directory, target)
+      await mkdir(folder)
+      await writeFile(path.join(folder, definition.bundle), 'unsigned bundle')
+      await writeFile(path.join(folder, definition.bundle + '.sig'), signature())
+      await writeFile(path.join(folder, definition.marker), definition.value)
+    }
+    const result = spawnSync(process.execPath, ['scripts/create-updater-manifest.mjs'], {
+      cwd: new URL('..', import.meta.url),
+      env: {
+        ...process.env,
+        RELEASE_ASSETS_DIR: directory,
+        APP_VERSION: version,
+        TAG: tag,
+        GITHUB_REPOSITORY: repository,
+      },
+      encoding: 'utf8',
+    })
+    if (result.error) throw result.error
+    assert.notEqual(result.status, 0)
+    assert.match(result.stderr, /invalid updater signature|updater signature verification failed/)
+    assert.equal(existsSync(path.join(directory, 'latest.json')), false)
+  } finally {
+    await rm(directory, { recursive: true, force: true })
+  }
+})
 
 test('public manifest binds both signed updater bundles to the new repository and tag', () => {
   const manifest = buildUpdaterManifest(inputs)

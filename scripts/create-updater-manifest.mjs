@@ -1,5 +1,6 @@
 import { readdir, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
+import { execFileSync } from 'node:child_process'
 import { buildUpdaterManifest, UPDATER_TARGETS } from './updater-manifest.mjs'
 
 async function listFiles(directory, parent = '') {
@@ -38,6 +39,7 @@ if (!version || !tag || !repository) {
 const files = await listFiles(directory)
 const builtTargets = {}
 const signatures = {}
+const updaterPublicKey = JSON.parse(await readFile('src-tauri/tauri.conf.json', 'utf8')).plugins.updater.pubkey
 for (const [target, definition] of Object.entries(UPDATER_TARGETS)) {
   const markers = files.filter((file) => path.posix.basename(file) === definition.markerName)
   if (markers.length !== 1) throw new Error('Expected one build marker for ' + target)
@@ -47,6 +49,13 @@ for (const [target, definition] of Object.entries(UPDATER_TARGETS)) {
   if (bundles.length !== 1) throw new Error('Expected one updater artifact for ' + target)
   const signaturePath = bundles[0] + '.sig'
   signatures[signaturePath] = await readFile(path.join(directory, signaturePath), 'utf8')
+  execFileSync('cargo', [
+    'run', '--quiet', '--locked',
+    '--manifest-path', 'scripts/updater-signature-verifier/Cargo.toml',
+    '--', updaterPublicKey,
+    path.join(directory, bundles[0]),
+    path.join(directory, signaturePath),
+  ], { stdio: 'inherit' })
 }
 
 const changelog = await readFile('CHANGELOG.md', 'utf8')

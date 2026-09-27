@@ -286,6 +286,46 @@ pub struct DeviceAuthResponse {
     pub verification_uri: String,
     pub expires_in: u64,
     pub interval: u64,
+    #[serde(default)]
+    pub session_id: u64,
+}
+
+#[derive(Default)]
+struct DeviceAuthSession {
+    next_id: u64,
+    active: Option<(u64, String, bool)>,
+}
+
+impl DeviceAuthSession {
+    fn begin(&mut self) -> u64 {
+        self.next_id += 1;
+        self.active = None;
+        self.next_id
+    }
+
+    fn activate(&mut self, id: u64, device_code: String) -> bool {
+        if self.next_id != id {
+            return false;
+        }
+        self.active = Some((id, device_code, false));
+        true
+    }
+
+    fn is_active(&self, id: u64, device_code: &str) -> bool {
+        matches!(&self.active, Some((active_id, active_code, false)) if *active_id == id && active_code == device_code)
+    }
+
+    fn cancel(&mut self, id: u64) -> bool {
+        if !matches!(&self.active, Some((active_id, _, _)) if *active_id == id) {
+            return false;
+        }
+        let committed = self
+            .active
+            .as_ref()
+            .is_some_and(|(_, _, committed)| *committed);
+        self.active = None;
+        committed
+    }
 }
 
 // GitHub 账号信息
@@ -325,6 +365,7 @@ pub struct AppState {
     pub clone_cancel_tasks: AsyncMutex<HashSet<String>>,
     pub(crate) app_restart_guard: AppRestartGuard,
     pub http_client: reqwest::Client,
+    device_auth_session: Mutex<DeviceAuthSession>,
 }
 
 impl AppState {
@@ -341,6 +382,7 @@ impl AppState {
                 .timeout(std::time::Duration::from_secs(15))
                 .build()
                 .unwrap(),
+            device_auth_session: Mutex::new(DeviceAuthSession::default()),
         }
     }
 
@@ -4660,7 +4702,9 @@ fn get_github_client_id() -> Result<String, String> {
     }
     // 4. 编译时嵌入值
     option_env!("GITSYNC_GITHUB_CLIENT_ID")
-        .map(|s| s.to_string())
+        .map(str::trim)
+        .filter(|s| !s.is_empty())
+        .map(str::to_string)
         .ok_or_else(|| "未找到 GitHub client_id。请任选一种方式配置：\n  - 环境变量: export GITSYNC_GITHUB_CLIENT_ID=xxx\n  - 开发模式: echo xxx > github_client_id\n  - 生产环境: echo xxx > ~/.gitsync/github_client_id（Windows 可使用 %USERPROFILE%\\.gitsync\\github_client_id）\n  - 编译嵌入: GITSYNC_GITHUB_CLIENT_ID=xxx cargo build".to_string())
 }
 
@@ -4703,6 +4747,17 @@ struct GithubAccessTokenResponse {
 pub async fn github_start_device_auth(
     state: State<'_, AppState>,
 ) -> Result<DeviceAuthResponse, String> {
+    let session_id = {
+        let mut session = state.device_auth_session.lock().unwrap();
+        if session
+            .active
+            .as_ref()
+            .is_some_and(|(_, _, committed)| *committed)
+        {
+            delete_github_token()?;
+        }
+        session.begin()
+    };
     let client = &state.http_client;
     let client_id = get_github_client_id()?;
     let params = [("client_id", client_id.as_str()), ("scope", "repo")];
@@ -4721,16 +4776,36 @@ pub async fn github_start_device_auth(
         return Err(format!("GitHub 认证初始化失败: {body}"));
     }
 
-    resp.json::<DeviceAuthResponse>()
+    let mut auth = resp
+        .json::<DeviceAuthResponse>()
         .await
-        .map_err(|e| format!("解析响应失败: {e}"))
+        .map_err(|e| format!("解析响应失败: {e}"))?;
+    if !state
+        .device_auth_session
+        .lock()
+        .unwrap()
+        .activate(session_id, auth.device_code.clone())
+    {
+        return Err("登录请求已取消".to_string());
+    }
+    auth.session_id = session_id;
+    Ok(auth)
 }
 
 #[tauri::command]
 pub async fn github_poll_token(
     device_code: String,
+    session_id: u64,
     state: State<'_, AppState>,
 ) -> Result<GithubAccount, String> {
+    if !state
+        .device_auth_session
+        .lock()
+        .unwrap()
+        .is_active(session_id, &device_code)
+    {
+        return Err("登录请求已取消".to_string());
+    }
     let client = &state.http_client;
     let client_id = get_github_client_id()?;
     let params = [
@@ -4767,8 +4842,6 @@ pub async fn github_poll_token(
         .access_token
         .ok_or_else(|| "未获取到 access token".to_string())?;
 
-    store_github_token(&token)?;
-
     let user_resp = client
         .get("https://api.github.com/user")
         .header("Authorization", format!("Bearer {}", &token))
@@ -4782,10 +4855,31 @@ pub async fn github_poll_token(
         return Err("获取用户信息失败".to_string());
     }
 
-    user_resp
+    let account = user_resp
         .json::<GithubAccount>()
         .await
-        .map_err(|e| format!("解析用户信息失败: {e}"))
+        .map_err(|e| format!("解析用户信息失败: {e}"))?;
+
+    let mut session = state.device_auth_session.lock().unwrap();
+    if !session.is_active(session_id, &device_code) {
+        return Err("登录请求已取消".to_string());
+    }
+    store_github_token(&token)?;
+    session.active = Some((session_id, device_code, true));
+    Ok(account)
+}
+
+#[tauri::command]
+pub fn github_cancel_device_auth(
+    session_id: u64,
+    state: State<'_, AppState>,
+) -> Result<(), String> {
+    let mut session = state.device_auth_session.lock().unwrap();
+    if matches!(&session.active, Some((id, _, true)) if *id == session_id) {
+        delete_github_token()?;
+    }
+    session.cancel(session_id);
+    Ok(())
 }
 
 #[tauri::command]
@@ -4817,7 +4911,9 @@ pub async fn github_get_account(state: State<'_, AppState>) -> Result<GithubAcco
 }
 
 #[tauri::command]
-pub fn github_logout() -> Result<bool, String> {
+pub fn github_logout(state: State<'_, AppState>) -> Result<bool, String> {
+    let mut session = state.device_auth_session.lock().unwrap();
+    session.active = None;
     delete_github_token()?;
     Ok(true)
 }
@@ -4920,16 +5016,43 @@ mod tests {
         normalize_github_repo_direction, normalize_github_repo_sort,
         normalize_github_repo_visibility_filter, normalize_repo_metadata_refresh_concurrency,
         now_timestamp, rebind_repo_branch_upstream_inner, switch_and_update_repo_branch_inner,
-        switch_repo_branch_inner, unset_repo_branch_upstream_inner, AppState, RepoConfig,
-        BRANCH_COMPARISON_DETACHED, BRANCH_COMPARISON_ERROR, BRANCH_COMPARISON_NO_UPSTREAM,
-        BRANCH_COMPARISON_OK, BRANCH_COMPARISON_REMOTE_ONLY, BRANCH_COMPARISON_UPSTREAM_GONE,
-        REPOS_FILE_NAME,
+        switch_repo_branch_inner, unset_repo_branch_upstream_inner, AppState, DeviceAuthSession,
+        RepoConfig, BRANCH_COMPARISON_DETACHED, BRANCH_COMPARISON_ERROR,
+        BRANCH_COMPARISON_NO_UPSTREAM, BRANCH_COMPARISON_OK, BRANCH_COMPARISON_REMOTE_ONLY,
+        BRANCH_COMPARISON_UPSTREAM_GONE, REPOS_FILE_NAME,
     };
     use crate::branch_delete::{delete_branch_locked, BranchDeleteRequest};
     use std::fs;
     use std::path::{Path, PathBuf};
     use std::process::Command;
     use std::time::{SystemTime, UNIX_EPOCH};
+
+    #[test]
+    fn device_auth_cancel_and_retry_invalidate_in_flight_polls() {
+        let mut session = DeviceAuthSession::default();
+        let first = session.begin();
+        assert!(session.activate(first, "first-code".to_string()));
+        assert!(session.is_active(first, "first-code"));
+        assert!(!session.cancel(first));
+        assert!(!session.is_active(first, "first-code"));
+
+        let second = session.begin();
+        assert!(!session.activate(first, "stale-code".to_string()));
+        assert!(session.activate(second, "second-code".to_string()));
+        assert!(!session.cancel(first));
+        assert!(session.is_active(second, "second-code"));
+    }
+
+    #[test]
+    fn device_auth_tracks_a_committed_session_for_cancel_cleanup() {
+        let mut session = DeviceAuthSession::default();
+        let id = session.begin();
+        assert!(session.activate(id, "code".to_string()));
+        session.active = Some((id, "code".to_string(), true));
+        assert!(!session.is_active(id, "code"));
+        assert!(session.cancel(id));
+        assert!(session.active.is_none());
+    }
 
     fn unique_temp_dir(name: &str) -> PathBuf {
         let suffix = SystemTime::now()
@@ -5232,7 +5355,9 @@ mod tests {
         let changed = apply_repo_git_metadata(
             &mut repo,
             Some("main".to_string()),
-            Some(Some("git@github.com:example-user/SampleRepo.git".to_string())),
+            Some(Some(
+                "git@github.com:example-user/SampleRepo.git".to_string(),
+            )),
         );
 
         assert!(changed);
