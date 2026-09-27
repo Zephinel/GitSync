@@ -1,0 +1,5 @@
+/* File rows intentionally avoid paint containment so one card owns every edge. */
+
+.working-changes-action[hidden] {
+  display: none !important;
+}

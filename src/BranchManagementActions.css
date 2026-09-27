@@ -1,0 +1,229 @@
+/* Complete-view actions are rendered by BranchManagementLayer itself. */
+.branch-management-table__header,
+.branch-management-row {
+  grid-template-columns: minmax(180px, 1.35fr) minmax(170px, 1.15fr) minmax(100px, 0.72fr) minmax(110px, 0.7fr) 176px !important;
+}
+
+.branch-management-table__header--batch,
+.branch-management-row--batch {
+  grid-template-columns: 30px minmax(180px, 1.35fr) minmax(170px, 1.15fr) minmax(100px, 0.72fr) minmax(110px, 0.7fr) 176px !important;
+}
+
+.branch-management-create-header {
+  position: static;
+  width: 32px !important;
+  min-width: 32px;
+  height: 32px;
+  padding: 0;
+  display: inline-grid;
+  place-items: center;
+  border: 0 !important;
+  border-radius: 8px;
+  background: transparent !important;
+  color: var(--text-secondary) !important;
+  box-shadow: none !important;
+  font-size: 0;
+  line-height: 0;
+}
+
+.branch-management-create-header:hover:not(:disabled) {
+  border: 0 !important;
+  color: var(--accent-blue) !important;
+  background: color-mix(in srgb, var(--accent-blue) 13%, transparent) !important;
+  transform: none !important;
+}
+
+.branch-management-create-header:focus-visible {
+  background: color-mix(in srgb, var(--accent-blue) 15%, transparent) !important;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-blue) 24%, transparent) !important;
+}
+
+.branch-management-create-header > span,
+.branch-management-row__actions > .branch-management-create-row > span {
+  display: none;
+}
+
+.branch-management-create-header > svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+}
+
+.branch-management-row__actions > .branch-management-create-row,
+.branch-management-row__actions > .branch-management-switch-row {
+  width: 30px !important;
+  min-width: 30px;
+  height: 30px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  align-self: center;
+  font-size: 0;
+  line-height: 0;
+  white-space: nowrap;
+}
+
+.branch-management-row__actions > button > svg {
+  width: 16px !important;
+  height: 16px !important;
+  display: block;
+}
+
+.branch-management-row__actions > .branch-management-create-row {
+  color: var(--text-secondary) !important;
+}
+
+.branch-management-row--selected {
+  border-color: transparent;
+  background: var(--bg-card-hover);
+  box-shadow: var(--app-card-highlight-shadow);
+}
+
+.branch-management-summary {
+  flex-wrap: wrap;
+}
+
+.branch-management-summary .branch-management-view-toggle {
+  min-width: max-content;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  margin-left: auto;
+  padding: 2px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--app-action-surface-background);
+  box-shadow: var(--app-action-surface-shadow);
+}
+
+.branch-management-summary .branch-management-view-toggle button {
+  height: 22px;
+  margin-left: 0;
+  padding: 0 9px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-tertiary);
+  font-size: 10px;
+  font-weight: 650;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: none;
+}
+
+.branch-management-summary .branch-management-view-toggle button:hover:not(:disabled) {
+  color: var(--text-primary);
+  background: color-mix(in srgb, var(--bg-card) 74%, transparent);
+}
+
+.branch-management-summary .branch-management-view-toggle .branch-management-view-toggle__button--active {
+  color: var(--accent-blue);
+  background: var(--bg-card);
+  box-shadow: 0 1px 3px rgba(8, 15, 28, 0.12);
+}
+
+.branch-management-summary .branch-management-view-toggle + .branch-management-text-action {
+  margin-left: 0;
+}
+
+.branch-management-stage[data-branch-management-view-mode="branches"] .branch-management-table__header:not(.branch-management-table__header--batch) span:first-of-type::after,
+.branch-management-stage[data-branch-management-view-mode="branches"] .branch-management-table__header--batch span:nth-of-type(2)::after {
+  content: '（逻辑分支）';
+  margin-left: 5px;
+  color: color-mix(in srgb, var(--text-tertiary) 72%, transparent);
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.branch-management-stage[data-branch-management-view-mode="refs"] .branch-management-table__header:not(.branch-management-table__header--batch) span:first-of-type::after,
+.branch-management-stage[data-branch-management-view-mode="refs"] .branch-management-table__header--batch span:nth-of-type(2)::after {
+  content: '（Git 引用）';
+  margin-left: 5px;
+  color: color-mix(in srgb, var(--text-tertiary) 72%, transparent);
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.branch-management-state-pill[data-branch-status-direction] {
+  gap: 4px;
+  padding-inline: 5px 7px;
+}
+
+.branch-management-state-pill__direction {
+  width: 12px;
+  min-width: 12px;
+  height: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: currentColor;
+  line-height: 0;
+  transform: translateY(1px);
+}
+
+.branch-management-state-pill__direction svg {
+  width: 12px;
+  height: 12px;
+  display: block;
+  overflow: visible;
+}
+
+/* AI name suggestions use branchName as the single selected-state authority. */
+.branch-creation-suggestions .branch-creation-suggestion {
+  position: relative;
+}
+
+.branch-creation-suggestions .branch-creation-suggestion--selected {
+  background: color-mix(in srgb, var(--accent-blue) 15%, var(--bg-input));
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--accent-blue) 10%, transparent);
+  transform: none;
+}
+
+.branch-creation-suggestions .branch-creation-suggestion--selected::after {
+  content: '✓ 已选择';
+  position: absolute;
+  top: 7px;
+  right: 8px;
+  padding: 2px 6px;
+  border: 0;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent-blue) 12%, var(--bg-card));
+  color: var(--accent-blue);
+  font-size: 8px;
+  font-weight: 750;
+  line-height: 1.2;
+}
+
+.branch-creation-suggestions .branch-creation-suggestion--selected strong {
+  padding-right: 58px;
+  color: var(--accent-blue);
+}
+
+@media (max-width: 1000px) {
+  .branch-management-table__header,
+  .branch-management-row {
+    grid-template-columns: minmax(170px, 1.25fr) minmax(150px, 1fr) minmax(90px, 0.65fr) minmax(100px, 0.65fr) 176px !important;
+  }
+
+  .branch-management-table__header--batch,
+  .branch-management-row--batch {
+    grid-template-columns: 30px minmax(170px, 1.25fr) minmax(150px, 1fr) minmax(90px, 0.65fr) minmax(100px, 0.65fr) 176px !important;
+  }
+}
+
+@media (max-width: 860px) {
+  .branch-management-summary .branch-management-view-toggle {
+    order: 20;
+    margin-left: 0;
+  }
+
+  .branch-management-summary .branch-management-view-toggle + .branch-management-text-action {
+    order: 21;
+    margin-left: auto;
+  }
+}

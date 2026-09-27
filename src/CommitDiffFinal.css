@@ -1,0 +1,120 @@
+.commit-diff-header__icon-btn.github-repo-browser__close {
+  min-width: 38px;
+  height: 38px;
+  padding: 0 10px;
+  gap: 6px;
+  opacity: 1;
+  box-shadow: none;
+}
+
+.commit-diff-header__icon-btn.github-repo-browser__close:hover {
+  transform: none;
+}
+
+.commit-diff-header__icon-btn.github-repo-browser__close:disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
+  color: var(--text-tertiary);
+  background: var(--bg-elevated);
+}
+
+.commit-diff-header__icon-btn svg,
+.commit-diff-header__icon-btn .icon {
+  width: 16px;
+  height: 16px;
+  display: block;
+}
+
+.commit-diff-file-item--card,
+.commit-diff-file-item--card:hover {
+  box-shadow: none;
+}
+
+.commit-diff-file-item--card.commit-diff-file-item--selected,
+.commit-diff-file-item--card.commit-diff-file-item--selected:hover {
+  border-color: transparent;
+  background: color-mix(in srgb, var(--accent-blue) 13%, var(--bg-elevated) 87%);
+  box-shadow: none;
+}
+
+.commit-diff-header__actions,
+.commit-diff-file-header__actions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  align-self: center;
+}
+
+.commit-diff-file-header--designed {
+  grid-template-columns: minmax(0, 1fr) auto;
+  text-align: left;
+  align-items: center;
+}
+
+.commit-diff-file-header__identity {
+  width: 100%;
+  min-width: 0;
+  justify-self: stretch;
+  justify-content: flex-start;
+  text-align: left;
+  align-items: center;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+}
+
+.commit-diff-file-header__main {
+  min-width: 0;
+  width: 100%;
+  text-align: left;
+  justify-self: stretch;
+}
+
+.commit-diff-file-header__path,
+.commit-diff-file-header__old {
+  width: 100%;
+  text-align: left;
+  justify-self: start;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.commit-diff-file-header__status {
+  height: 24px;
+  min-width: 0;
+  padding: 0 9px;
+  border-radius: 999px;
+  border: 1px solid var(--border-subtle);
+  background: color-mix(in srgb, var(--bg-elevated) 62%, transparent);
+  color: var(--text-tertiary);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+  cursor: default;
+  box-shadow: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+.commit-diff-file-header__status--added {
+  color: var(--status-success);
+  border-color: color-mix(in srgb, var(--status-success) 34%, transparent);
+  background: color-mix(in srgb, var(--status-success-bg) 52%, transparent);
+}
+
+.commit-diff-file-header__status--deleted {
+  color: var(--status-error);
+  border-color: color-mix(in srgb, var(--status-error) 34%, transparent);
+  background: color-mix(in srgb, var(--status-error-bg) 52%, transparent);
+}
+
+.commit-diff-file-header__status--renamed,
+.commit-diff-file-header__status--copied,
+.commit-diff-file-header__status--typechange {
+  color: var(--status-warning);
+  border-color: color-mix(in srgb, var(--status-warning) 34%, transparent);
+  background: color-mix(in srgb, var(--status-warning-bg) 52%, transparent);
+}

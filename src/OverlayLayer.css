@@ -1,0 +1,61 @@
+:root {
+  --z-overlay-workspace: 760;
+  --z-overlay-dialog: 840;
+  --z-overlay-nested: 920;
+  --motion-overlay-enter-duration: 220ms;
+  --motion-overlay-exit-duration: 160ms;
+  --motion-overlay-enter-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --motion-overlay-exit-ease: cubic-bezier(0.4, 0, 1, 1);
+}
+
+.app-overlay-root {
+  display: contents;
+}
+
+.app-overlay-lane,
+.app-overlay-slot {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+.app-overlay-lane {
+  isolation: isolate;
+}
+
+.app-overlay-lane[data-overlay-level='workspace'] {
+  z-index: var(--z-overlay-workspace);
+}
+
+.app-overlay-lane[data-overlay-level='dialog'] {
+  z-index: var(--z-overlay-dialog);
+}
+
+.app-overlay-lane[data-overlay-level='nested'] {
+  z-index: var(--z-overlay-nested);
+}
+
+.app-overlay-slot {
+  z-index: var(--overlay-slot-z-index, 0);
+  isolation: isolate;
+}
+
+.app-overlay-slot[data-overlay-presence='exiting'] {
+  pointer-events: auto;
+}
+
+.app-overlay-slot[data-overlay-presence='exiting'][data-overlay-pointer-blocked='true'] {
+  pointer-events: none;
+}
+
+.app-overlay-slot__content {
+  display: contents;
+}
+
+.app-overlay-slot__content > * {
+  pointer-events: auto;
+}
+
+.app-overlay-slot[data-overlay-presence='exiting'] .app-overlay-slot__content > * {
+  pointer-events: none;
+}

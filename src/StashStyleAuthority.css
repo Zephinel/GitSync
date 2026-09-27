@@ -1,0 +1,20 @@
+/*
+ * Canonical Stash stylesheet manifest.
+ *
+ * Stash surfaces are lazy React modules, but their CSS must not depend on the
+ * order in which a popover, create dialog, or manager happens to mount. The
+ * application root loads this manifest once, in this exact order.
+ */
+@import './StashManagerDialog.css';
+@import './CreateStashDialog.css';
+@import './StashManagementPopover.css';
+@import './StashEntryActionMenu.css';
+@import './StashScopeResolutionPanel.css';
+@import './WorkingChangesStashEntry.css';
+@import './StashDetailView.css';
+@import './stash-manager/StashManagerLayout.css';
+@import './stash-manager/StashManagerTable.css';
+@import './StashManagerLongList.css';
+@import './StashManagementRedesign.css';
+@import './StashFinalPolish.css';
+@import './StashMicroPolish.css';

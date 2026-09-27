@@ -1,0 +1,115 @@
+/*
+ * Commit History endpoint handoff authority.
+ *
+ * Opening owns only the endpoint shadow transition on the existing live Hero
+ * RepoCard. Closing owns the post-flight Dashboard presentation handoff. This
+ * layer must not take Hero geometry, width interpolation, toolbar anatomy, or
+ * the protected compact-Hero content contract away from their existing owners.
+ */
+
+/*
+ * The source RepoCard is highlighted when its History trigger is activated.
+ * Start the visible Hero flight from that same depth and let the implicit
+ * animation endpoint resolve to App.css's existing Hero shadow. Only
+ * box-shadow is animated here; geometry and content ownership are unchanged.
+ */
+.commit-history-hero-card--geometry-ready.commit-history-hero-card--opening
+  .repo-card--history-flight {
+  animation:
+    commitHistoryOpeningShadow
+    var(--commit-history-motion-duration)
+    var(--commit-history-motion-ease)
+    both;
+}
+
+@keyframes commitHistoryOpeningShadow {
+  from {
+    box-shadow: var(--app-card-highlight-shadow);
+  }
+}
+
+/*
+ * The shared closing flight already lands on the resting Dashboard card
+ * surface. finishCommitHistoryClose() then restores focus to the source card's
+ * History trigger. Keep that accessibility focus without letting the card-level
+ * :focus-within hover treatment raise the whole card again on the first
+ * Dashboard frame.
+ */
+.repo-card:not(.repo-card--syncing):has(.repo-card__history-link:focus):hover,
+.repo-card:not(.repo-card--syncing):has(.repo-card__history-link:focus):focus-within {
+  border: 0;
+  background: var(--bg-card);
+  box-shadow: var(--app-dashboard-card-shadow);
+  transform: none;
+  overflow: hidden;
+  z-index: auto;
+  transition: none;
+}
+
+/*
+ * The source card owns the final Dashboard anatomy only after the Hero has
+ * handed off its resting surface. Reveal that already-reserved content inside
+ * the source card's compact handoff frame so the endpoint does not switch from
+ * compact Hero content to full Dashboard chrome in one paint.
+ */
+.repo-card--history-handoff > :is(
+  .sync-info,
+  .repo-card__branch-attention,
+  .repo-card__state-callout,
+  .repo-card__missing-overlay,
+  .repo-card__actions-wrap
+) {
+  opacity: 0;
+  transform: translateY(6px);
+  pointer-events: none;
+  animation: commitHistoryDashboardChromeReveal 180ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.repo-card--history-handoff {
+  overflow: hidden;
+  animation: commitHistorySourceCardReveal 180ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  height: var(--commit-history-handoff-height, auto);
+  margin-bottom: var(--commit-history-handoff-reserve-height, 0px);
+}
+
+@keyframes commitHistorySourceCardReveal {
+  from {
+    height: var(--commit-history-handoff-height, auto);
+    margin-bottom: var(--commit-history-handoff-reserve-height, 0px);
+  }
+
+  to {
+    height: var(--commit-history-handoff-source-height, auto);
+    margin-bottom: 0;
+  }
+}
+
+@keyframes commitHistoryDashboardChromeReveal {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .commit-history-hero-card--geometry-ready.commit-history-hero-card--opening
+    .repo-card--history-flight {
+    animation: none;
+  }
+
+  .repo-card--history-handoff,
+  .repo-card--history-handoff > :is(
+    .sync-info,
+    .repo-card__branch-attention,
+    .repo-card__state-callout,
+    .repo-card__missing-overlay,
+    .repo-card__actions-wrap
+  ) {
+    animation-duration: 1ms;
+  }
+}

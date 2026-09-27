@@ -1,0 +1,149 @@
+/*
+ * Final form/control chrome authority.
+ * Loaded after all legacy feature styles so old input/select borders and text-only
+ * refresh/sync chrome cannot reappear on individual secondary surfaces.
+ */
+
+/* Text-entry controls are borderless. Checkbox/radio/range/color/file keep native or semantic chrome. */
+body:has(#root) :is(
+  input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='color']):not([type='file']),
+  textarea,
+  select
+) {
+  border: 0 !important;
+  border-color: transparent !important;
+}
+
+body:has(#root) :is(
+  input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='color']):not([type='file']),
+  textarea,
+  select
+):is(:focus, :focus-visible) {
+  border: 0 !important;
+  border-color: transparent !important;
+}
+
+/* CustomSelect panels are white/elevated surfaces without a perimeter stroke. */
+body:has(#root) .custom-select__menu {
+  border: 0 !important;
+  border-color: transparent !important;
+}
+
+/* GitHub repository browser input shells and filters follow the same borderless contract. */
+body:has(#root) .github-repo-browser__search {
+  border: 0 !important;
+  border-color: transparent !important;
+}
+
+body:has(#root) .github-repo-browser__filter-toggle,
+body:has(#root) .github-repo-browser__filter-toggle:hover,
+body:has(#root) .github-repo-browser__filter-toggle--active,
+body:has(#root) .github-repo-browser__filter-toggle .toggle {
+  border: 0 !important;
+  border-color: transparent !important;
+}
+
+/* Visibility / language / sort triggers use one neutral gray rounded input surface. */
+body:has(#root) .github-repo-browser__select .custom-select__trigger,
+body:has(#root) .github-repo-browser__select .custom-select__trigger:hover:not(:disabled),
+body:has(#root) .github-repo-browser__select .custom-select__trigger--open,
+body:has(#root) .github-repo-browser__select .custom-select__trigger--open:hover:not(:disabled) {
+  background: var(--bg-input) !important;
+  border: 0 !important;
+  border-color: transparent !important;
+  border-radius: var(--radius-md) !important;
+  box-shadow: none !important;
+}
+
+/* Clone modal owns one common left/right content line. */
+body:has(#root) :is(
+  .github-repo-browser__clone-head,
+  .github-repo-browser__clone-scroll,
+  .github-repo-browser__clone-actions,
+  .github-repo-browser__path-row,
+  .github-repo-browser__clone-list,
+  .github-repo-browser__error--clone
+) {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  margin-inline: 0 !important;
+}
+
+body:has(#root) .github-repo-browser__clone-scroll {
+  padding-inline: 0 !important;
+  scrollbar-gutter: auto !important;
+}
+
+body:has(#root) .github-repo-browser__clone-list {
+  scrollbar-gutter: auto !important;
+}
+
+body:has(#root) .github-repo-browser__clone-item {
+  padding-inline: 0 !important;
+}
+
+body:has(#root) .github-repo-browser__clone-actions {
+  padding-inline: 0 !important;
+  padding-top: 12px !important;
+}
+
+/*
+ * Working Changes refresh keeps the canonical icon and zero-size label on one flex row.
+ * Grid would create a second implicit row for the text node and pull the icon upward.
+ */
+body:has(#root) .working-changes-staging-refresh {
+  flex: 0 0 36px !important;
+  width: 36px !important;
+  min-width: 36px !important;
+  height: 36px !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  align-self: center !important;
+  border: 0 !important;
+  border-color: transparent !important;
+  border-radius: 11px !important;
+  background: var(--bg-card) !important;
+  color: var(--text-secondary) !important;
+  box-shadow: var(--shadow-card) !important;
+  font-size: 0 !important;
+  line-height: 0 !important;
+}
+
+body:has(#root) .working-changes-staging-refresh > .working-changes-staging-refresh__icon {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  display: block;
+}
+
+body:has(#root) .working-changes-staging-refresh:hover:not(:disabled) {
+  color: var(--accent-blue) !important;
+  background: color-mix(in srgb, var(--accent-blue) 8%, var(--bg-card)) !important;
+}
+
+/* Per-branch sync is an icon action, not a text action. */
+body:has(#root) .branch-attention-detail__primary-action--icon-only {
+  width: 36px !important;
+  min-width: 36px !important;
+  height: 36px !important;
+  padding: 0 !important;
+  display: grid !important;
+  place-items: center !important;
+  font-size: 0 !important;
+  line-height: 0 !important;
+}
+
+body:has(#root) .branch-attention-detail__primary-action--icon-only svg {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+
+@media (max-width: 760px) {
+  body:has(#root) .working-changes-staging-refresh {
+    align-self: flex-end !important;
+  }
+}

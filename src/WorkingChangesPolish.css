@@ -1,0 +1,113 @@
+/* Working-tree detail refinements layered after the shared commit-diff styles. */
+
+.working-changes-sheet .commit-diff-header__title-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  min-width: 0;
+  width: 100%;
+  gap: 12px;
+}
+
+.working-changes-sheet .commit-diff-header__app-name {
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: calc(100% - 214px);
+}
+
+.working-changes-sheet .commit-diff-header__hash,
+.working-changes-sheet .commit-diff-header__title {
+  flex: 0 0 auto;
+}
+
+.working-changes-sheet .commit-diff-header__actions {
+  min-width: 80px;
+  justify-content: flex-end;
+}
+
+.working-changes-sheet .commit-diff-header__meta.commit-diff-header__meta--designed .commit-diff-meta-item--branch {
+  width: auto;
+  min-width: 0;
+  max-width: min(320px, 25vw);
+  flex: 0 1 auto;
+}
+
+.working-changes-sheet.commit-diff-sheet--focus .commit-diff-header__main {
+  padding-right: 96px;
+}
+
+.working-changes-sheet.commit-diff-sheet--focus .commit-diff-header__app-name {
+  max-width: calc(100% - 214px);
+}
+
+.working-changes-backdrop {
+  animation: workingChangesBackdropIn 180ms ease both;
+}
+
+.working-changes-sheet {
+  transform-origin: center center;
+  will-change: transform, opacity;
+  animation: workingChangesSheetIn 240ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.app-overlay-slot[data-overlay-presence='exiting'] .working-changes-stage {
+  pointer-events: none;
+}
+
+.app-overlay-slot[data-overlay-presence='exiting'] .working-changes-backdrop {
+  pointer-events: none;
+  animation: workingChangesBackdropOut 190ms ease both;
+}
+
+.app-overlay-slot[data-overlay-presence='exiting'] .working-changes-sheet {
+  pointer-events: none;
+  animation: workingChangesSheetOut 190ms cubic-bezier(0.4, 0, 1, 1) both;
+}
+
+@keyframes workingChangesBackdropIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes workingChangesBackdropOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes workingChangesSheetIn {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.982);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes workingChangesSheetOut {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(12px) scale(0.988);
+  }
+}
+
+@media (max-width: 900px) {
+  .working-changes-sheet .commit-diff-header__app-name,
+  .working-changes-sheet.commit-diff-sheet--focus .commit-diff-header__app-name {
+    max-width: calc(100% - 188px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .working-changes-backdrop,
+  .working-changes-sheet,
+  .app-overlay-slot[data-overlay-presence='exiting'] .working-changes-backdrop,
+  .app-overlay-slot[data-overlay-presence='exiting'] .working-changes-sheet {
+    animation-duration: 1ms !important;
+  }
+}

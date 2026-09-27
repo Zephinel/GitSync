@@ -1,0 +1,61 @@
+/*
+ * Canonical chrome authority for secondary surfaces.
+ *
+ * Commit Diff is the visual reference for top-right action spacing. Display-only
+ * identity marks keep their size/background/radius but drop ornamental frames so
+ * they do not read as buttons. Neutral secondary controls may keep focus feedback
+ * while dropping their always-visible shell border.
+ */
+:root {
+  --secondary-window-header-action-gap: 12px;
+}
+
+body:has(#root) :is(
+  .commit-diff-header__actions,
+  .branch-management-header__actions,
+  .branch-attention-detail__header-actions,
+  .stash-manager-header__actions
+) {
+  gap: var(--secondary-window-header-action-gap) !important;
+}
+
+body:has(#root) :is(
+  .commit-diff-brand-mark,
+  .commit-diff-header__icon,
+  .commit-diff-preload-card__icon,
+  .stash-manager-header__icon,
+  .branch-management-header__brand,
+  .branch-management-confirm__icon,
+  .branch-attention-detail__icon,
+  .branch-attention-detail__delete-icon,
+  .working-changes-dialog__icon,
+  .stash-scope-resolution__icon,
+  .stash-management-popover__empty-icon,
+  .stash-manager-toast__icon,
+  .repo-card__icon,
+  .empty-state__icon,
+  .github-repo-browser__icon,
+  .device-auth-dialog__icon,
+  .clone-dialog__icon,
+  .import-result-dialog__icon,
+  .sync-guard-dialog__icon
+) {
+  border: 0 !important;
+  border-color: transparent !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+}
+
+body:has(#root) :is(
+  .stash-manager-search-field,
+  .stash-manager-sort-select .custom-select__trigger
+) {
+  border: 0 !important;
+  border-color: transparent !important;
+}
+
+body:has(#root) .branch-management-summary .branch-management-view-toggle {
+  border: 0 !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}

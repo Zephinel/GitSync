@@ -1,0 +1,11 @@
+.commit-diff-file-glyph[data-image-file-glyph="true"] {
+  color: currentColor;
+}
+
+.image-file-glyph__icon {
+  width: 18px;
+  height: 18px;
+  display: block;
+  flex: 0 0 auto;
+  fill: currentColor;
+}

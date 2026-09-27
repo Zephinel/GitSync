@@ -1,0 +1,228 @@
+.stash-management-popover {
+  position: absolute;
+  top: calc(100% + 7px);
+  right: 0;
+  z-index: var(--z-repo-more-menu, 1320);
+  width: min(320px, calc(100vw - 24px));
+  max-height: min(460px, calc(100vh - 40px));
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  overflow: visible;
+  border: 0;
+  border-radius: 12px;
+  background: var(--bg-card);
+  box-shadow: var(--shadow-elevated);
+  animation: stashManagementMenuIn 140ms ease both;
+}
+
+.stash-management-popover button {
+  font: inherit;
+}
+
+.stash-management-popover__header {
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 10px 8px 16px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.stash-management-popover__header > strong {
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 760;
+}
+
+.stash-management-popover__refresh {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition:
+    background var(--transition-fast),
+    color var(--transition-fast);
+}
+
+.stash-management-popover__refresh:hover:not(:disabled),
+.stash-management-popover__refresh:focus-visible {
+  background: var(--bg-card-hover);
+  color: var(--accent-blue);
+  outline: none;
+}
+
+.stash-management-popover__refresh:disabled {
+  cursor: wait;
+  opacity: 0.55;
+}
+
+.stash-management-popover__refresh svg {
+  width: 17px;
+  height: 17px;
+}
+
+.stash-management-popover__body {
+  min-height: 0;
+  overflow: visible;
+}
+
+.stash-management-popover__state {
+  min-height: 112px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 20px;
+  color: var(--text-tertiary);
+  font-size: 10px;
+}
+
+.stash-management-popover__error {
+  min-height: 88px;
+  display: grid;
+  align-content: center;
+  gap: 4px;
+  padding: 18px 16px;
+  color: var(--status-error);
+  font-size: 9px;
+  line-height: 1.45;
+}
+
+.stash-management-popover__error strong {
+  font-size: 10px;
+}
+
+.stash-management-popover__empty {
+  min-height: 116px;
+  display: grid;
+  place-content: center;
+  gap: 6px;
+  padding: 22px 18px;
+  text-align: center;
+}
+
+.stash-management-popover__empty strong {
+  color: var(--text-secondary);
+  font-size: 11px;
+}
+
+.stash-management-popover__empty span {
+  color: var(--text-tertiary);
+  font-size: 9px;
+}
+
+.stash-management-popover__list {
+  min-height: 0;
+  overflow: visible;
+  padding: 7px;
+}
+
+.stash-management-popover__item {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  padding: 4px;
+  border-radius: 9px;
+  transition: background var(--transition-fast);
+}
+
+.stash-management-popover__item:hover {
+  background: var(--bg-card-hover);
+}
+
+.stash-management-popover__identity {
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+  padding: 7px 8px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.stash-management-popover__identity:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--accent-blue) 34%, transparent);
+  outline-offset: 1px;
+}
+
+.stash-management-popover__identity strong,
+.stash-management-popover__identity span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stash-management-popover__identity strong {
+  color: var(--text-primary);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.stash-management-popover__identity span {
+  color: var(--text-tertiary);
+  font-size: 8px;
+}
+
+.stash-management-popover__footer {
+  padding: 7px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.stash-management-popover__footer button {
+  width: 100%;
+  min-height: 36px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 10px;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+
+.stash-management-popover__footer button:hover {
+  background: var(--bg-card-hover);
+  color: var(--text-primary);
+}
+
+.stash-management-popover__footer button:focus-visible {
+  background: var(--bg-card-hover);
+  color: var(--text-primary);
+  outline: none;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-blue) 28%, transparent);
+}
+
+.stash-management-popover__footer svg {
+  width: 14px;
+  height: 14px;
+  color: var(--text-tertiary);
+}
+
+@keyframes stashManagementMenuIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}

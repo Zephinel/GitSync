@@ -1,0 +1,416 @@
+.image-diff {
+  min-height: 0;
+  height: 100%;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow: hidden;
+  box-sizing: border-box;
+  background: color-mix(in srgb, var(--bg-page) 76%, var(--bg-card));
+}
+
+.image-diff-loading {
+  min-height: 220px;
+}
+
+.image-diff__toolbar {
+  flex: 0 0 auto;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.image-diff__title {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.image-diff__title strong {
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.image-diff__title span {
+  overflow: hidden;
+  color: var(--text-tertiary);
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.image-diff__controls {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.image-diff__segmented {
+  height: 30px;
+  padding: 3px;
+  display: inline-flex;
+  align-items: stretch;
+  gap: 2px;
+  border: 0;
+  border-radius: 9px;
+  background: var(--app-action-surface-background);
+}
+
+.image-diff__segmented button,
+.image-diff__fit-button {
+  min-width: 52px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 10px;
+  font-weight: 650;
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.image-diff__segmented button:hover,
+.image-diff__fit-button:hover {
+  color: var(--text-primary);
+}
+
+.image-diff__segmented .image-diff__segmented-active {
+  background: var(--bg-card);
+  color: var(--accent-blue);
+  box-shadow: 0 1px 3px color-mix(in srgb, var(--text-primary) 12%, transparent);
+}
+
+.image-diff__fit-button {
+  height: 30px;
+  border: 0;
+  background: var(--app-action-surface-background);
+}
+
+.image-diff__grid {
+  min-height: 0;
+  flex: 1 1 auto;
+  display: grid;
+  gap: 12px;
+  overflow: hidden;
+}
+
+.image-diff__grid--two,
+.image-diff__grid--single {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.image-diff-pane {
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--border-default);
+  border-radius: 12px;
+  background: var(--bg-card);
+}
+
+.image-diff-pane__header {
+  min-height: 48px;
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid var(--border-subtle);
+  background: color-mix(in srgb, var(--bg-input) 70%, var(--bg-card));
+}
+
+.image-diff-pane__header > div {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.image-diff-pane__header strong {
+  color: var(--text-primary);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.image-diff-pane__header span {
+  max-width: 100%;
+  overflow: hidden;
+  color: var(--text-tertiary);
+  font-size: 9px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.image-diff-pane__header small {
+  flex: 0 0 auto;
+  color: var(--text-tertiary);
+  font-size: 9px;
+  white-space: nowrap;
+}
+
+.image-diff-pane__canvas,
+.image-diff-swipe__stage {
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow: auto;
+  background-color: #f7f7f8;
+  background-image:
+    linear-gradient(45deg, #e3e5e8 25%, transparent 25%),
+    linear-gradient(-45deg, #e3e5e8 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #e3e5e8 75%),
+    linear-gradient(-45deg, transparent 75%, #e3e5e8 75%);
+  background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+  background-size: 16px 16px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .image-diff-pane__canvas,
+  .image-diff-swipe__stage {
+    background-color: #26282c;
+    background-image:
+      linear-gradient(45deg, #34373c 25%, transparent 25%),
+      linear-gradient(-45deg, #34373c 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, #34373c 75%),
+      linear-gradient(-45deg, transparent 75%, #34373c 75%);
+  }
+}
+
+.image-diff-pane__canvas {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.image-diff-pane__canvas img {
+  display: block;
+  image-rendering: auto;
+  user-select: none;
+}
+
+.image-diff-pane--fit .image-diff-pane__canvas img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.image-diff-pane--actual .image-diff-pane__canvas {
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+
+.image-diff-pane--actual .image-diff-pane__canvas img {
+  width: auto;
+  height: auto;
+  max-width: none;
+  max-height: none;
+}
+
+.image-diff-pane--unavailable {
+  border-style: dashed;
+}
+
+.image-diff-pane__message {
+  min-height: 0;
+  flex: 1 1 auto;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  text-align: center;
+  color: var(--text-tertiary);
+}
+
+.image-diff-pane__message strong {
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.image-diff-pane__message span {
+  max-width: 420px;
+  font-size: 10px;
+  line-height: 1.6;
+}
+
+.image-diff-pane__message--error strong {
+  color: var(--status-error);
+}
+
+.image-diff-swipe {
+  min-height: 0;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow: hidden;
+}
+
+.image-diff-swipe__stage {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border-default);
+  border-radius: 12px;
+}
+
+.image-diff-swipe__image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  user-select: none;
+}
+
+.image-diff-swipe--actual .image-diff-swipe__stage {
+  display: block;
+  overflow: auto;
+}
+
+.image-diff-swipe--actual .image-diff-swipe__image {
+  width: auto;
+  height: auto;
+  max-width: none;
+  max-height: none;
+}
+
+.image-diff-swipe__after-clip {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: var(--image-diff-position);
+  overflow: hidden;
+}
+
+.image-diff-swipe__after-clip .image-diff-swipe__image {
+  width: calc(100% * 100 / max(var(--image-diff-position), 1));
+  max-width: none;
+}
+
+.image-diff-swipe__divider {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: var(--image-diff-position);
+  width: 2px;
+  transform: translateX(-1px);
+  background: var(--accent-blue);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--bg-card) 80%, transparent);
+  pointer-events: none;
+}
+
+.image-diff-swipe__divider span {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: translate(-50%, -50%);
+  border: 2px solid var(--bg-card);
+  border-radius: 50%;
+  background: var(--accent-blue);
+  color: white;
+  font-size: 13px;
+  font-weight: 700;
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--text-primary) 20%, transparent);
+}
+
+.image-diff-swipe__label {
+  position: absolute;
+  top: 10px;
+  padding: 4px 7px;
+  border: 1px solid color-mix(in srgb, var(--border-default) 80%, transparent);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--bg-card) 88%, transparent);
+  color: var(--text-primary);
+  font-size: 9px;
+  font-weight: 700;
+  backdrop-filter: blur(8px);
+}
+
+.image-diff-swipe__label--before {
+  left: 10px;
+}
+
+.image-diff-swipe__label--after {
+  right: 10px;
+}
+
+.image-diff-swipe__range {
+  flex: 0 0 auto;
+  display: grid;
+  grid-template-columns: auto minmax(120px, 1fr) 38px;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-tertiary);
+  font-size: 9px;
+}
+
+.image-diff-swipe__range input {
+  width: 100%;
+  accent-color: var(--accent-blue);
+}
+
+.image-diff-swipe__range output {
+  text-align: right;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.image-diff-swipe--error {
+  border: 1px dashed var(--status-error);
+  border-radius: 12px;
+}
+
+.image-diff-unsupported small {
+  max-width: 720px;
+  color: var(--text-tertiary);
+  font-size: 9px;
+  line-height: 1.6;
+  text-align: center;
+}
+
+@media (max-width: 900px) {
+  .image-diff__toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .image-diff__controls {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .image-diff__grid--two,
+  .image-diff__grid--single {
+    grid-template-columns: 1fr;
+    overflow: auto;
+  }
+
+  .image-diff-pane {
+    min-height: 320px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .image-diff__segmented button,
+  .image-diff__fit-button {
+    transition: none;
+  }
+}

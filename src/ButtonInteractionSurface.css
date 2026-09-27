@@ -1,0 +1,38 @@
+/*
+ * Final interaction authority for visible action buttons.
+ *
+ * Interaction is expressed through the shared tonal background, a small lift,
+ * and a restrained outer shadow. An inset edge is intentionally not used: it
+ * reads as an outlined control and makes otherwise borderless buttons look
+ * like they change geometry on hover.
+ */
+
+:root,
+[data-theme="dark"] {
+  --app-action-surface-hover-shadow:
+    0 3px 8px rgba(0, 0, 0, 0.12);
+  --app-action-surface-pressed-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] {
+  --app-action-surface-hover-shadow:
+    0 3px 8px rgba(20, 31, 55, 0.055);
+  --app-action-surface-pressed-shadow:
+    0 1px 2px rgba(20, 31, 55, 0.035);
+}
+
+/*
+ * ActionButtonSurface.css consumes these variables for every registered
+ * action-button family. The !important custom-property declarations ensure
+ * semantic families keep their current color/background while sharing the
+ * same hover/pressed motion language.
+ */
+body:has(#root) button {
+  --app-action-hover-shadow: var(--app-action-surface-hover-shadow) !important;
+  --app-action-hover-transform: translateY(-1px) !important;
+  --app-action-pressed-shadow: var(--app-action-surface-pressed-shadow) !important;
+  --app-action-pressed-transform: translateY(0) scale(0.985) !important;
+}
+
+/* Keyboard focus remains owned by ActionButtonSurface.css for accessibility. */

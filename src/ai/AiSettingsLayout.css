@@ -1,0 +1,31 @@
+.ai-settings-section {
+  overflow: visible;
+}
+
+.ai-settings-section .ai-settings-row > * {
+  min-width: 0;
+  margin-left: 0;
+}
+
+.ai-settings-section .ai-settings-label {
+  width: auto !important;
+  max-width: none !important;
+  flex: none !important;
+}
+
+.ai-settings-section .ai-settings-label small {
+  width: auto !important;
+  max-width: none !important;
+}
+
+.ai-settings-section .ai-settings-field,
+.ai-settings-section .ai-model-overrides {
+  justify-self: stretch;
+}
+
+.ai-settings-section .ai-key-control .ai-settings-input,
+.ai-settings-section .ai-model-picker__input-row .ai-settings-input,
+.ai-settings-section .ai-model-overrides .ai-settings-input {
+  width: 100% !important;
+  max-width: none !important;
+}

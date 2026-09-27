@@ -1,0 +1,18 @@
+.ai-settings-section .ai-settings-actions > button {
+  flex: 0 0 96px;
+  width: 96px;
+  min-width: 96px;
+  max-width: 96px;
+  box-sizing: border-box;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+@media (max-width: 560px) {
+  .ai-settings-section .ai-settings-actions > button {
+    flex: 1 1 100%;
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+  }
+}

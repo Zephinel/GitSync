@@ -1,0 +1,180 @@
+/* Final micro-polish loaded once by StashStyleAuthority.css. */
+
+/* Keep the empty state compact and give the glyph/copy comfortable separation. */
+.stash-management-popover__empty {
+  min-height: 108px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 18px 24px;
+  text-align: left;
+}
+
+.stash-management-popover__empty-icon {
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+.stash-management-popover__empty-icon svg {
+  width: 28px;
+  height: 28px;
+}
+
+.stash-management-popover__empty-copy {
+  min-width: 0;
+  max-width: 190px;
+  display: grid;
+  gap: 5px;
+}
+
+.stash-management-popover__empty-copy strong,
+.stash-management-popover__empty-copy span {
+  display: block;
+}
+
+/* Create Stash uses the same icon-only close control as the manager. */
+.create-stash-header {
+  position: relative;
+  min-height: 76px;
+  padding: 15px 64px 15px 18px;
+}
+
+.create-stash-header > .stash-manager-header__actions {
+  position: absolute;
+  top: 9px;
+  right: 9px;
+  gap: 2px;
+}
+
+.create-stash-header .stash-manager-icon-button {
+  width: 34px;
+  height: 34px;
+  min-height: 34px;
+  padding: 0 !important;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-secondary);
+}
+
+.create-stash-header .stash-manager-icon-button:hover:not(:disabled),
+.create-stash-header .stash-manager-icon-button:focus-visible {
+  outline: none;
+  background: color-mix(in srgb, var(--accent-blue) 11%, transparent);
+  color: var(--accent-blue);
+}
+
+.create-stash-header .stash-manager-icon-button svg {
+  width: 17px;
+  height: 17px;
+}
+
+/* The sort control and every highlighted option share one exact width. */
+.stash-manager-toolbar {
+  grid-template-columns: minmax(220px, 1fr) 152px;
+}
+
+.stash-manager-sort-select {
+  width: 152px;
+}
+
+.stash-manager-sort-select .custom-select__trigger {
+  width: 100%;
+}
+
+.stash-manager-sort-select .custom-select__menu {
+  left: 0;
+  right: 0;
+  width: 100%;
+  min-width: 100%;
+  padding: 6px;
+  overflow: hidden auto;
+  box-sizing: border-box;
+}
+
+.stash-manager-sort-select .custom-select__options {
+  width: 100%;
+  display: grid;
+  gap: 4px;
+}
+
+.stash-manager-sort-select .custom-select__option {
+  width: 100%;
+  min-width: 0;
+  min-height: 34px;
+  height: auto;
+  justify-content: flex-start;
+  padding: 0 10px;
+  box-sizing: border-box;
+  text-align: left;
+}
+
+.stash-manager-sort-select .custom-select__option-label {
+  width: 100%;
+  min-width: 0;
+  text-align: left;
+}
+
+.stash-manager-sort-select .custom-select__option--active {
+  box-shadow: none;
+  background: color-mix(in srgb, var(--accent-blue) 10%, var(--bg-card));
+}
+
+.stash-manager-dialog--management .stash-manager-toolbar {
+  grid-template-columns: minmax(220px, 1fr) 152px;
+}
+
+.stash-manager-dialog--management .stash-manager-sort-select {
+  width: 152px;
+}
+
+.stash-manager-dialog--management .stash-manager-sort-select .custom-select__menu,
+.stash-manager-dialog--management .stash-manager-sort-select .custom-select__options,
+.stash-manager-dialog--management .stash-manager-sort-select .custom-select__option {
+  width: 100%;
+  min-width: 0;
+}
+
+/* Pending evidence has one grouped action surface rather than loose buttons. */
+.stash-manager-pending__actions {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.stash-manager-pending__actions button {
+  min-height: 30px;
+  padding: 0 9px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--app-action-surface-background);
+}
+
+.stash-manager-pending__actions button:last-child {
+  background: color-mix(in srgb, var(--status-warning) 10%, var(--bg-card));
+  color: var(--status-warning);
+}
+
+@media (max-width: 760px) {
+  .stash-manager-sort-select,
+  .stash-manager-dialog--management .stash-manager-sort-select {
+    width: 100%;
+  }
+
+  .stash-manager-pending__item,
+  .stash-manager-pending__actions {
+    align-items: stretch;
+  }
+
+  .stash-manager-pending__actions {
+    flex-direction: column;
+  }
+}

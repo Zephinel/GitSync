@@ -1,0 +1,223 @@
+@import './BranchManagementViewportLayout.css';
+
+/* Interaction and motion corrections layered after BranchManagementLayer.css. */
+
+body.branch-management-overlay-active .repo-card__meta-hover-card[aria-label="仓库分支总览"],
+.repo-card__meta-hover-card[aria-label="仓库分支总览"][data-branch-management-overlay-source-hidden="true"] {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+.repo-card__meta-hover-card[aria-label="仓库分支总览"] > .branch-management-hover-expand {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 6;
+}
+
+.branch-management-icon-action,
+.branch-management-hover-expand {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  padding: 0;
+  display: inline-grid;
+  place-items: center;
+  border: 0 !important;
+  border-radius: 8px;
+  outline: 0;
+  background: transparent !important;
+  color: var(--text-secondary);
+  box-shadow: none !important;
+  cursor: pointer;
+  line-height: 0;
+  transition: background 150ms ease, color 150ms ease, transform 150ms ease;
+}
+
+.branch-management-icon-action > svg,
+.branch-management-hover-expand > svg {
+  display: block;
+  width: 16px;
+  height: 16px;
+}
+
+.branch-management-hover-expand {
+  width: 22px;
+  height: 22px;
+  min-width: 22px;
+  border-radius: 6px;
+}
+
+.branch-management-hover-expand > svg {
+  width: 14px;
+  height: 14px;
+}
+
+.branch-management-icon-action:hover:not(:disabled),
+.branch-management-hover-expand:hover:not(:disabled),
+.branch-management-icon-btn--active {
+  border: 0 !important;
+  background: color-mix(in srgb, var(--accent-blue) 13%, transparent) !important;
+  color: var(--accent-blue) !important;
+  transform: none !important;
+}
+
+.branch-management-icon-action:focus-visible,
+.branch-management-hover-expand:focus-visible {
+  background: color-mix(in srgb, var(--accent-blue) 15%, transparent) !important;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-blue) 24%, transparent) !important;
+}
+
+.branch-management-header {
+  align-items: center;
+}
+
+.branch-management-header__actions {
+  align-items: center;
+}
+
+.branch-management-header__actions .branch-management-icon-action,
+.branch-management-batch-toggle {
+  height: 32px;
+}
+
+.branch-management-batch-toggle {
+  width: 32px;
+  min-width: 32px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0 !important;
+  border-radius: 8px;
+  background: transparent !important;
+  color: var(--text-secondary);
+  box-shadow: none !important;
+  font-size: 0;
+  line-height: 0;
+}
+
+.branch-management-batch-toggle > .branch-management-batch-toggle__icon {
+  width: 15px;
+  height: 15px;
+  flex: 0 0 15px;
+  display: block;
+}
+
+.branch-management-batch-toggle:hover,
+.branch-management-batch-toggle--active {
+  border: 0 !important;
+  background: color-mix(in srgb, var(--accent-blue) 13%, transparent) !important;
+  color: var(--accent-blue);
+}
+
+.branch-management-summary .branch-management-text-action {
+  border: 0 !important;
+  background: transparent !important;
+  color: var(--text-secondary);
+  box-shadow: none !important;
+}
+
+.branch-management-summary .branch-management-text-action:hover:not(:disabled) {
+  border: 0 !important;
+  background: color-mix(in srgb, var(--accent-blue) 12%, transparent) !important;
+  color: var(--accent-blue);
+}
+
+.branch-management-row__actions button {
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.branch-management-row__actions button:hover:not(:disabled) {
+  border: 0 !important;
+  background: color-mix(in srgb, var(--accent-blue) 12%, transparent) !important;
+  color: var(--accent-blue);
+  transform: none !important;
+}
+
+.branch-management-row__actions .branch-management-row__delete:hover:not(:disabled) {
+  border: 0 !important;
+  background: color-mix(in srgb, var(--status-error) 12%, transparent) !important;
+  color: var(--status-error);
+}
+
+.branch-management-row__actions button:disabled,
+.branch-management-summary button:disabled,
+.branch-management-icon-action:disabled {
+  background: transparent !important;
+}
+
+.branch-management-sheet__content {
+  min-width: 0;
+  min-height: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* The branch workspace now uses a conventional modal transition instead of a hero/FLIP. */
+.branch-management-hero-snapshot {
+  display: none !important;
+}
+
+.branch-management-sheet {
+  transform-origin: center center !important;
+  will-change: transform, opacity;
+}
+
+.app-overlay-slot:is([data-overlay-presence='entering'], [data-overlay-presence='open']) .branch-management-sheet--motion-ready {
+  animation: branchManagementSheetReveal 240ms cubic-bezier(0.2, 0.78, 0.22, 1) both;
+}
+
+.app-overlay-slot[data-overlay-presence='exiting'] .branch-management-sheet--motion-ready {
+  pointer-events: none;
+  animation: branchManagementSheetReturn 190ms cubic-bezier(0.4, 0, 1, 1) both;
+}
+
+.app-overlay-slot[data-overlay-presence='exiting'] .branch-management-backdrop {
+  animation: branchManagementBackdropLateOut 190ms ease both;
+}
+
+@keyframes branchManagementSheetReveal {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.975);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes branchManagementSheetReturn {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(10px) scale(0.985);
+  }
+}
+
+@keyframes branchManagementBackdropLateOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-overlay-slot .branch-management-sheet--motion-ready,
+  .app-overlay-slot[data-overlay-presence='exiting'] .branch-management-backdrop {
+    animation-duration: 1ms !important;
+  }
+}

@@ -1,0 +1,155 @@
+.ai-settings-section .settings__label.ai-settings-label {
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+.ai-settings-section .settings__label.ai-settings-label small {
+  margin-top: 2px;
+  color: var(--text-tertiary);
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.ai-settings-section .ai-model-overrides label {
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 400;
+}
+
+.ai-settings-section .ai-primary-button,
+.ai-settings-section .ai-secondary-button,
+.ai-settings-section .ai-danger-button,
+.ai-settings-section .ai-config-badge,
+.ai-settings-section .ai-key-status {
+  font-weight: 600;
+}
+
+.ai-settings-section .ai-request-feedback {
+  width: 100%;
+  height: 64px;
+  min-height: 64px;
+  max-height: 64px;
+  box-sizing: border-box;
+  overflow: hidden;
+  align-items: center;
+}
+
+.ai-settings-section .ai-request-feedback__main {
+  min-width: 0;
+  max-height: 42px;
+  overflow: hidden;
+}
+
+.ai-settings-section .ai-request-feedback__main strong,
+.ai-settings-section .ai-request-feedback__main span {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ai-settings-section .ai-settings-actions {
+  min-height: 36px;
+  margin-top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ai-settings-section .ai-settings-actions > button {
+  flex: 0 0 auto;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.ai-settings-section .ai-settings-actions > button:nth-child(1) {
+  width: 88px;
+}
+
+.ai-settings-section .ai-settings-actions > button:nth-child(2) {
+  width: 96px;
+}
+
+.ai-settings-section .ai-settings-actions > .ai-primary-button,
+.ai-settings-section .ai-settings-actions > .ai-danger-button {
+  width: 96px;
+}
+
+.ai-settings-section .ai-settings-actions > button .ai-spinner + * {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ai-settings-section .ai-model-fetch {
+  width: 104px;
+  min-width: 104px;
+  max-width: 104px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.ai-settings-section .ai-model-select .custom-select__menu {
+  padding: 8px;
+  background: var(--bg-card);
+}
+
+[data-theme="light"] .ai-settings-section .ai-model-select .custom-select__menu {
+  background: #ffffff;
+}
+
+.ai-settings-section .ai-model-select .custom-select__search-wrap {
+  padding: 2px 2px 8px;
+}
+
+.ai-settings-section .ai-model-select .custom-select__options {
+  display: grid;
+  gap: 6px;
+  padding: 2px;
+}
+
+.ai-settings-section .ai-model-select .custom-select__option {
+  min-height: 38px;
+  margin: 0;
+  padding: 8px 10px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  font-weight: 400;
+  overflow: hidden;
+}
+
+.ai-settings-section .ai-model-select .custom-select__option:hover,
+.ai-settings-section .ai-model-select .custom-select__option--active {
+  border-color: color-mix(in srgb, var(--accent-blue) 38%, transparent);
+  background: color-mix(in srgb, var(--accent-blue) 11%, var(--bg-card) 89%);
+}
+
+.ai-settings-section .ai-model-select .custom-select__option-label {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+  .ai-settings-section .ai-settings-actions {
+    justify-content: stretch;
+  }
+
+  .ai-settings-section .ai-settings-actions > button:nth-child(1),
+  .ai-settings-section .ai-settings-actions > button:nth-child(2),
+  .ai-settings-section .ai-settings-actions > .ai-primary-button,
+  .ai-settings-section .ai-settings-actions > .ai-danger-button {
+    width: auto;
+    flex: 1 1 120px;
+  }
+}

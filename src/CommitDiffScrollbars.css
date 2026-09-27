@@ -1,0 +1,21 @@
+.commit-diff-raw::-webkit-scrollbar,
+.commit-diff-split::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.commit-diff-raw::-webkit-scrollbar-track,
+.commit-diff-split::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.commit-diff-raw::-webkit-scrollbar-thumb,
+.commit-diff-split::-webkit-scrollbar-thumb {
+  background: var(--text-tertiary);
+  border-radius: 3px;
+}
+
+.commit-diff-raw::-webkit-scrollbar-corner,
+.commit-diff-split::-webkit-scrollbar-corner {
+  background: transparent;
+}

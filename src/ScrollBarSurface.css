@@ -1,0 +1,125 @@
+/*
+ * Canonical scrollbar treatment for application windows and scrollable lists.
+ * The transparent thumb border creates a quiet gutter so the bar does not sit
+ * directly against a sheet or card edge.
+ */
+
+:root {
+  --app-scrollbar-thumb: color-mix(in srgb, var(--text-tertiary) 58%, transparent);
+  --app-scrollbar-thumb-hover: color-mix(in srgb, var(--text-tertiary) 76%, transparent);
+  --app-scrollbar-thumb-active: color-mix(in srgb, var(--text-secondary) 82%, transparent);
+}
+
+[data-theme="light"] {
+  --app-scrollbar-thumb: color-mix(in srgb, var(--text-tertiary) 50%, transparent);
+  --app-scrollbar-thumb-hover: color-mix(in srgb, var(--text-tertiary) 68%, transparent);
+  --app-scrollbar-thumb-active: color-mix(in srgb, var(--text-secondary) 76%, transparent);
+}
+
+/* Keep the visible thumb narrow while leaving a three-pixel transparent inset. */
+body:has(#root) * {
+  scrollbar-width: thin !important;
+  scrollbar-color: var(--app-scrollbar-thumb) transparent !important;
+}
+
+body:has(#root) *::-webkit-scrollbar {
+  width: 12px !important;
+  height: 12px !important;
+}
+
+body:has(#root) *::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+body:has(#root) *::-webkit-scrollbar-thumb {
+  background: var(--app-scrollbar-thumb) !important;
+  border: 3px solid transparent !important;
+  border-radius: 999px !important;
+  background-clip: padding-box !important;
+}
+
+body:has(#root) *::-webkit-scrollbar-thumb:hover {
+  background-color: var(--app-scrollbar-thumb-hover) !important;
+}
+
+body:has(#root) *::-webkit-scrollbar-thumb:active {
+  background-color: var(--app-scrollbar-thumb-active) !important;
+}
+
+body:has(#root) *::-webkit-scrollbar-corner,
+body:has(#root) *::-webkit-scrollbar-button {
+  background: transparent !important;
+}
+
+/* Reserve a stable lane for the windows and lists that can actually scroll. */
+body:has(#root) :where(
+  .branch-attention-detail__content,
+  .branch-management-table__body,
+  .branch-management-confirm__list,
+  .commit-diff-raw,
+  .commit-diff-split,
+  .commit-history-drawer__branch-select .custom-select__menu,
+  .commit-history-drawer__body,
+  .commit-history-toolbar__branch-select .custom-select__menu,
+  .custom-select__menu,
+  .custom-select__options,
+  .import-entry-menu,
+  .repo-card__branch-hover-list,
+  .conflict-dialog__body,
+  .error-log-dialog__body,
+  .sync-guard-dialog__body,
+  .import-result-dialog__body,
+  .notice-dialog__body,
+  .script-log-dialog__body,
+  .script-log-dialog__session-list,
+  .script-log-dialog__output,
+  .github-repo-browser__list,
+  .github-repo-browser__clone-scroll,
+  .github-repo-browser__clone-list,
+  .image-diff-pane__canvas,
+  .image-diff-swipe__stage,
+  .image-diff__grid--two,
+  .image-diff__grid--single,
+  .create-stash-content,
+  .create-stash-files,
+  .stash-manager-pending--compact,
+  .stash-manager-sidebar__branches,
+  .stash-manager-table-scroll,
+  .stash-manager-body,
+  .stash-manager-master-list__items,
+  .stash-manager-sort-select .custom-select__menu,
+  .stash-detail-files,
+  .stash-detail-diff,
+  .stash-scope-resolution__files,
+  .working-changes-dialog--ai-commit,
+  .working-changes-dialog__files,
+  .ai-commit-coverage ul,
+  .ai-review-preview,
+  .ai-review-drawer__content,
+  .ai-model-select .custom-select__options,
+  .branch-creation-dialog__body,
+  .app-bootstrap-error__panel code
+) {
+  scrollbar-gutter: stable;
+}
+
+/* Floating repository surfaces must not reserve an empty right-side lane. */
+body:has(#root) :is(
+  .repo-card__meta-hover-card,
+  .repo-card__more-menu,
+  .stash-entry-action-menu__panel,
+  .import-entry-menu
+) {
+  scrollbar-gutter: auto;
+}
+
+/* The dashboard deliberately uses a hidden main scrollbar; keep that contract. */
+body:has(#root) .main-content {
+  scrollbar-width: none !important;
+}
+
+body:has(#root) .main-content::-webkit-scrollbar {
+  width: 0 !important;
+  height: 0 !important;
+  display: none !important;
+}

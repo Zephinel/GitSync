@@ -1,0 +1,69 @@
+.stash-manager-dialog--management {
+  width: min(1120px, calc(100vw - 32px));
+  height: min(820px, calc(100vh - 32px));
+  max-height: calc(100vh - 32px);
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
+.stash-manager-dialog--management .stash-manager-body {
+  min-height: 0;
+  overflow: auto;
+}
+
+.stash-manager-search {
+  width: 100%;
+  min-height: 36px;
+  margin-bottom: 10px;
+  padding: 0 11px;
+  border: 1px solid var(--border-default);
+  border-radius: 9px;
+  outline: none;
+  background: var(--bg-input);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 10px;
+}
+
+.stash-manager-search:focus {
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-blue) 12%, transparent);
+}
+
+.stash-manager-item__main--button {
+  width: 100%;
+  min-width: 0;
+  display: grid;
+  gap: 7px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.stash-manager-item__main--button:hover .stash-manager-item__title strong,
+.stash-manager-item__main--button:focus-visible .stash-manager-item__title strong {
+  color: var(--accent-blue);
+}
+
+.stash-manager-item__main--button:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--accent-blue) 35%, transparent);
+  outline-offset: 4px;
+  border-radius: 7px;
+}
+
+.stash-manager-dialog--management .stash-detail-view {
+  min-height: 0;
+  height: auto;
+}
+
+@media (max-width: 760px) {
+  .stash-manager-dialog--management {
+    width: calc(100vw - 20px);
+    height: calc(100vh - 20px);
+    max-height: calc(100vh - 20px);
+  }
+}

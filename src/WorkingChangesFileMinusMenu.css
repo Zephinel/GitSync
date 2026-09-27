@@ -1,0 +1,83 @@
+/* Secondary-action menu for the consolidated mixed file-cell minus entry. */
+
+.working-changes-file-minus-menu {
+  position: fixed;
+  z-index: 960;
+  width: 208px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 5px;
+  border: 0;
+  border-radius: 11px;
+  background: var(--bg-card);
+  box-shadow: var(--shadow-elevated);
+  display: grid;
+  gap: 2px;
+  animation: workingChangesFileMinusMenuIn 130ms ease both;
+}
+
+.working-changes-file-minus-menu--bottom {
+  transform-origin: top right;
+}
+
+.working-changes-file-minus-menu--top {
+  transform-origin: bottom right;
+}
+
+.working-changes-file-minus-menu__item {
+  width: 100%;
+  min-height: 40px;
+  display: grid;
+  gap: 2px;
+  padding: 6px 10px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text-secondary);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.working-changes-file-minus-menu__item:hover:not(:disabled) {
+  background: var(--bg-card-hover);
+  color: var(--text-primary);
+}
+
+.working-changes-file-minus-menu__item:focus-visible:not(:disabled) {
+  background: var(--bg-card-hover);
+  color: var(--text-primary);
+  outline: none;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-blue) 28%, transparent);
+}
+
+.working-changes-file-minus-menu__item:disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
+}
+
+.working-changes-file-minus-menu__item strong {
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.working-changes-file-minus-menu__item small {
+  color: var(--text-tertiary);
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.working-changes-file-minus-menu__item--danger {
+  color: var(--status-error);
+}
+
+.working-changes-file-minus-menu__item--danger:hover:not(:disabled),
+.working-changes-file-minus-menu__item--danger:focus-visible:not(:disabled) {
+  background: color-mix(in srgb, var(--status-error) 8%, var(--bg-card-hover));
+  color: var(--status-error);
+}
+
+@keyframes workingChangesFileMinusMenuIn {
+  from { opacity: 0; transform: translateY(-3px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}

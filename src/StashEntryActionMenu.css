@@ -1,0 +1,19 @@
+.stash-entry-action-menu { position: relative; flex: 0 0 auto; }
+.stash-entry-action-menu__trigger { width: 30px; height: 30px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 8px; background: var(--app-action-surface-background); color: var(--text-tertiary); font: inherit; cursor: pointer; transition: background var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast); }
+.stash-entry-action-menu__trigger:hover:not(:disabled), .stash-entry-action-menu__trigger:focus-visible, .stash-entry-action-menu__trigger[aria-expanded="true"] { background: color-mix(in srgb, var(--accent-blue) 10%, var(--bg-card-hover)); color: var(--accent-blue); outline: none; }
+.stash-entry-action-menu__trigger:disabled { cursor: not-allowed; opacity: 0.45; }
+.stash-entry-action-menu__trigger svg { width: 17px; height: 17px; }
+.stash-entry-action-menu__panel { --stash-entry-action-menu-enter-y: -3px; position: fixed; z-index: var(--z-stash-entry-action-menu); width: 188px; overflow-y: auto; overscroll-behavior: contain; padding: 5px; border: 0; border-radius: 11px; background: var(--bg-card); box-shadow: var(--shadow-elevated); animation: stashEntryActionMenuIn 130ms ease both; }
+.stash-entry-action-menu__panel--bottom { transform-origin: top right; }
+.stash-entry-action-menu__panel--top { --stash-entry-action-menu-enter-y: 3px; transform-origin: bottom right; }
+.stash-entry-action-menu__panel > button { width: 100%; min-height: 36px; display: grid; grid-template-columns: 20px minmax(0, 1fr); align-items: center; gap: 8px; padding: 0 10px; border: 0; border-radius: 7px; background: transparent; color: var(--text-secondary); font: inherit; font-size: 10px; font-weight: 650; text-align: left; cursor: pointer; }
+.stash-entry-action-menu__panel > button:hover:not(:disabled) { background: var(--bg-card-hover); color: var(--text-primary); }
+.stash-entry-action-menu__panel > button:focus-visible:not(:disabled) { background: var(--bg-card-hover); color: var(--text-primary); outline: none; box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-blue) 28%, transparent); }
+.stash-entry-action-menu__panel > button:disabled { cursor: not-allowed; opacity: 0.42; }
+.stash-entry-action-menu__panel > button svg, .stash-entry-action-menu__notice svg { width: 16px; height: 16px; }
+.stash-entry-action-menu__panel > button:not(.stash-entry-action-menu__danger) svg { color: var(--accent-blue); }
+.stash-entry-action-menu__divider, .stash-entry-action-menu__separator { height: 1px; margin: 5px 6px; background: var(--border-subtle); }
+.stash-entry-action-menu__panel > .stash-entry-action-menu__danger { color: var(--status-error); }
+.stash-entry-action-menu__panel > .stash-entry-action-menu__danger:hover:not(:disabled), .stash-entry-action-menu__panel > .stash-entry-action-menu__danger:focus-visible:not(:disabled) { background: color-mix(in srgb, var(--status-error) 8%, var(--bg-card-hover)); color: var(--status-error); }
+.stash-entry-action-menu__notice { display: grid; grid-template-columns: 16px minmax(0, 1fr); gap: 7px; margin: 1px 1px 5px; padding: 8px 9px; border-radius: 7px; background: color-mix(in srgb, var(--status-warning) 8%, var(--bg-input)); color: var(--status-warning); font-size: 8px; line-height: 1.45; }
+@keyframes stashEntryActionMenuIn { from { opacity: 0; transform: translateY(var(--stash-entry-action-menu-enter-y)) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }

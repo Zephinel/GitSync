@@ -1,0 +1,302 @@
+/* Final CustomSelect visual authority. Loaded directly by main.jsx after the other root surface authorities. */
+
+:root {
+  --custom-select-trigger-min-height: 36px;
+  --custom-select-menu-inline-inset: 6px;
+}
+
+body:has(#root) .custom-select {
+  min-width: 0;
+}
+
+body:has(#root) .custom-select__trigger {
+  width: 100%;
+  min-width: 0;
+  min-height: var(--custom-select-trigger-min-height);
+  height: auto !important;
+  padding-block: 7px;
+  border: 0 !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  outline: 0;
+  align-items: center;
+}
+
+body:has(#root) .custom-select__trigger:hover:not(:disabled),
+body:has(#root) .custom-select__trigger--open,
+body:has(#root) .custom-select__trigger--open:hover:not(:disabled) {
+  border: 0 !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+body:has(#root) .custom-select__label {
+  min-width: 0;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  line-height: 1.35;
+  text-align: left;
+}
+
+body:has(#root) .custom-select__menu {
+  box-sizing: border-box;
+  padding-inline: 0 !important;
+  background: var(--bg-elevated) !important;
+  scrollbar-gutter: auto !important;
+}
+
+html[data-theme="light"] body:has(#root) .custom-select__menu,
+body[data-theme="light"]:has(#root) .custom-select__menu {
+  background: #fff !important;
+}
+
+body:has(#root) .custom-select__options {
+  width: 100% !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  box-sizing: border-box;
+  scrollbar-gutter: auto !important;
+}
+
+body:has(#root) .custom-select__option {
+  width: calc(100% - 12px) !important;
+  max-width: calc(100% - 12px) !important;
+  min-width: 0;
+  min-height: 30px;
+  height: auto !important;
+  margin-inline: 6px !important;
+  padding-block: 7px;
+  border: 0 !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  outline: 0;
+  overflow: visible !important;
+  box-sizing: border-box;
+}
+
+body:has(#root) .custom-select__option:hover,
+body:has(#root) .custom-select__option--active,
+body:has(#root) .custom-select__option--active:hover {
+  border: 0 !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  outline: 0 !important;
+}
+
+body:has(#root) .custom-select__option:hover:not(.custom-select__option--active) {
+  color: var(--text-primary) !important;
+  background: color-mix(in srgb, var(--text-primary) 8%, var(--bg-elevated) 92%) !important;
+}
+
+body:has(#root) .custom-select__option--active,
+body:has(#root) .custom-select__option--active:hover {
+  color: var(--accent-blue) !important;
+  background: color-mix(in srgb, var(--accent-blue) 24%, var(--bg-elevated) 76%) !important;
+}
+
+body:has(#root) .custom-select__option:focus-visible {
+  border: 0 !important;
+  border-color: transparent !important;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-blue) 28%, transparent) !important;
+  outline: 0 !important;
+}
+
+body:has(#root) .custom-select__option-label {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  line-height: 1.4;
+  text-align: left;
+}
+
+body:has(#root) .custom-select__option small {
+  white-space: normal !important;
+  overflow-wrap: anywhere;
+}
+
+/* Commit History keeps an input-like gray trigger while the opened menu stays white in light theme. */
+body:has(#root) :is(
+  .commit-history-toolbar__branch-select,
+  .commit-history-drawer__branch-select
+) .custom-select__trigger {
+  background: var(--bg-input) !important;
+}
+
+/* Commit History can contain many branches. Keep it scrollable without reserving a layout-width scrollbar lane. */
+body:has(#root) :is(
+  .commit-history-toolbar__branch-select,
+  .commit-history-drawer__branch-select
+) .custom-select__menu {
+  scrollbar-gutter: auto !important;
+  scrollbar-width: none !important;
+}
+
+body:has(#root) :is(
+  .commit-history-toolbar__branch-select,
+  .commit-history-drawer__branch-select
+) .custom-select__menu::-webkit-scrollbar {
+  width: 0 !important;
+  height: 0 !important;
+  display: none !important;
+}
+
+/* AI model selection keeps the model compact; explanatory text consumes its natural width first and wraps before the select drops below its minimum. */
+body:has(#root) .ai-model-picker__selection {
+  display: flex !important;
+  grid-template-columns: none !important;
+  width: 100%;
+  min-width: 0;
+  align-items: center;
+  gap: 12px !important;
+}
+
+body:has(#root) .ai-model-select {
+  --custom-select-trigger-min-height: 40px;
+  flex: 1 1 260px;
+  min-width: 220px;
+}
+
+body:has(#root) .ai-model-select .custom-select__trigger {
+  height: 40px !important;
+  min-height: 40px;
+  padding-block: 0;
+}
+
+body:has(#root) .ai-model-select .custom-select__label {
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
+body:has(#root) .ai-model-picker__selection > small {
+  flex: 0 1 max-content;
+  min-width: 0;
+  max-width: 360px !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere;
+  text-align: left !important;
+}
+
+body:has(#root) .ai-settings-section .ai-model-select .custom-select__option,
+body:has(#root) .ai-settings-section .ai-model-select .custom-select__option-label {
+  overflow: visible !important;
+}
+
+@media (max-width: 720px) {
+  body:has(#root) .ai-model-picker__selection {
+    flex-wrap: wrap;
+  }
+
+  body:has(#root) .ai-model-select,
+  body:has(#root) .ai-model-picker__selection > small {
+    flex-basis: 100%;
+    min-width: 0;
+    max-width: none !important;
+  }
+}
+
+/* Dashboard filtering and sorting use the shared CustomSelect surface. */
+body:has(#root) .dashboard-toolbar__select {
+  --custom-select-trigger-min-height: 36px;
+}
+
+body:has(#root) .dashboard-toolbar__select .custom-select__trigger {
+  min-height: 36px;
+  padding-block: 0 !important;
+  padding-inline: 8px;
+  background: var(--bg-elevated) !important;
+}
+
+body:has(#root) .dashboard-toolbar__select .custom-select__label {
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  overflow-wrap: normal !important;
+  word-break: normal !important;
+}
+
+body:has(#root) .dashboard-toolbar__select .custom-select__options {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+body:has(#root) .dashboard-toolbar__select .custom-select__option {
+  width: auto !important;
+  max-width: none !important;
+}
+
+body:has(#root) .dashboard-toolbar__sort-select .custom-select__option {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: baseline;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+body:has(#root) .dashboard-toolbar__sort-select .custom-select__option-label {
+  flex: 0 0 auto;
+  width: max-content !important;
+  max-width: none;
+  white-space: nowrap !important;
+  overflow-wrap: normal !important;
+  word-break: normal !important;
+}
+
+body:has(#root) .dashboard-toolbar__sort-select .custom-select__option small {
+  flex: 0 0 auto;
+  white-space: nowrap !important;
+  overflow-wrap: normal !important;
+  word-break: normal !important;
+}
+
+body:has(#root) .dashboard-toolbar__select .custom-select__menu {
+  left: auto;
+  right: 0;
+  min-width: 190px;
+}
+
+body:has(#root) .dashboard-toolbar__filter-select .custom-select__menu {
+  width: max-content;
+  min-width: 0;
+  max-width: calc(100vw - 24px);
+}
+
+body:has(#root) .dashboard-toolbar__filter-select .custom-select__options {
+  width: max-content !important;
+}
+
+body:has(#root) .dashboard-toolbar__filter-select .custom-select__option-label {
+  width: max-content !important;
+  max-width: none;
+  white-space: nowrap !important;
+  overflow-wrap: normal !important;
+  word-break: normal !important;
+}
+
+body:has(#root) .dashboard-toolbar__filter-select .custom-select__option small {
+  white-space: nowrap !important;
+  overflow-wrap: normal !important;
+  word-break: normal !important;
+}
+
+body:has(#root) .dashboard-toolbar__sort-select .custom-select__menu {
+  width: max-content;
+  min-width: 0;
+  max-width: calc(100vw - 24px);
+}
+
+body:has(#root) .dashboard-toolbar__sort-select .custom-select__options {
+  width: max-content !important;
+}

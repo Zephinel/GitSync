@@ -1,0 +1,105 @@
+.settings .theme-switcher,
+.settings .mode-btn-group {
+  width: fit-content;
+  min-width: 0;
+  height: 38px;
+  padding: 3px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: var(--bg-elevated);
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  flex-wrap: nowrap;
+  box-shadow: none;
+  isolation: isolate;
+}
+
+.settings .theme-btn,
+.settings .mode-btn {
+  position: relative;
+  z-index: 1;
+  height: 32px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  line-height: 1;
+  white-space: nowrap;
+  box-shadow: none;
+  transition:
+    background var(--transition-fast),
+    color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.settings .theme-btn {
+  width: 36px;
+  min-width: 36px;
+  padding: 0;
+}
+
+.settings .mode-btn {
+  min-width: 72px;
+  padding: 0 14px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.settings .theme-btn:hover,
+.settings .mode-btn:hover {
+  color: var(--text-primary);
+  background: var(--bg-card);
+  transform: none;
+}
+
+.settings .theme-btn--active,
+.settings .mode-btn--active {
+  color: var(--accent-blue);
+  background: var(--bg-card);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.settings .theme-btn:focus-visible,
+.settings .mode-btn:focus-visible {
+  outline: none;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.1),
+    0 0 0 2px color-mix(in srgb, var(--accent-blue) 32%, transparent);
+}
+
+.settings .theme-btn:disabled,
+.settings .mode-btn:disabled {
+  cursor: not-allowed;
+  color: var(--text-tertiary);
+  background: transparent;
+  opacity: 0.58;
+  box-shadow: none;
+}
+
+.settings .theme-btn .icon,
+.settings .mode-btn .icon {
+  width: 16px;
+  height: 16px;
+  display: block;
+}
+
+@media (max-width: 760px) {
+  .settings .theme-switcher,
+  .settings .mode-btn-group {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .settings .mode-btn {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+}

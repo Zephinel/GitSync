@@ -1,0 +1,50 @@
+.repo-card__meta-hover-card[aria-label="仓库分支总览"] > .repo-card__meta-hover-card-title {
+  padding-right: 34px;
+}
+
+.repo-card__meta-hover-card[aria-label="仓库分支总览"] > .branch-management-hover-action {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  z-index: 6;
+  width: 24px;
+  min-width: 24px;
+  height: 24px;
+  min-height: 24px;
+  padding: 0;
+  display: inline-grid;
+  place-items: center;
+  border: 0;
+  border-radius: 7px;
+  outline: 0;
+  background: color-mix(in srgb, var(--bg-card) 88%, transparent);
+  color: var(--text-secondary);
+  box-shadow: 0 1px 6px rgba(15, 23, 42, 0.12);
+  cursor: pointer;
+  line-height: 0;
+  transform: none;
+  transition: background 150ms ease, color 150ms ease, box-shadow 150ms ease;
+}
+
+.repo-card__meta-hover-card[aria-label="仓库分支总览"] > .branch-management-hover-action > svg {
+  display: block;
+  width: 14px;
+  height: 14px;
+}
+
+.repo-card__meta-hover-card[aria-label="仓库分支总览"] > .branch-management-hover-action:hover:not(:disabled),
+.repo-card__meta-hover-card[aria-label="仓库分支总览"] > .branch-management-hover-action:focus-visible {
+  background: color-mix(in srgb, var(--accent-blue) 13%, var(--bg-card));
+  color: var(--accent-blue);
+  transform: none;
+}
+
+.repo-card__meta-hover-card[aria-label="仓库分支总览"] > .branch-management-hover-action:focus-visible {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-blue) 24%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .repo-card__meta-hover-card[aria-label="仓库分支总览"] > .branch-management-hover-action {
+    transition-duration: 1ms !important;
+  }
+}

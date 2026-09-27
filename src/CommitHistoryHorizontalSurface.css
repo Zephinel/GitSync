@@ -1,0 +1,131 @@
+/*
+ * Commit History horizontal flight surface.
+ *
+ * This layer is intentionally horizontal-only: it does not set height,
+ * min-height, padding, contain, or any vertical layout property. The live
+ * RepoCard keeps owning its natural height and real width/reflow. Only the
+ * visible background/border edge is moved on a clipped compositor surface so
+ * horizontal expansion/contraction is less coupled to live-DOM paint work.
+ *
+ * Shadow deliberately stays owned by the real RepoCard. App.css already owns
+ * the canonical closing handoff from the Hero shadow to
+ * --app-dashboard-card-shadow; overriding that shadow here would create a
+ * second shadow authority and a visible last-frame discontinuity.
+ */
+
+.commit-history-hero-card--geometry-ready {
+  isolation: isolate;
+}
+
+/* Background + border only. Shadow is intentionally excluded. */
+.commit-history-hero-card--geometry-ready::before {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  left: 0;
+  width: max(
+    var(--commit-history-flight-start-width),
+    var(--commit-history-flight-end-width)
+  );
+  box-sizing: border-box;
+  pointer-events: none;
+  z-index: 0;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  clip-path: inset(
+    0
+    calc(
+      max(
+        var(--commit-history-flight-start-width),
+        var(--commit-history-flight-end-width)
+      ) - var(--commit-history-flight-start-width)
+    )
+    0
+    0
+    round var(--radius-lg)
+  );
+  animation:
+    commitHistoryHorizontalSurface
+    var(--commit-history-motion-duration)
+    var(--commit-history-motion-ease)
+    both;
+  will-change: clip-path;
+}
+
+/*
+ * Keep the real RepoCard's box geometry and shadow ownership untouched.
+ * Background + border move to the horizontal compositor surface above, while
+ * the existing App.css Hero/closing shadow rules continue to apply to this
+ * exact live RepoCard. In particular, do not set box-shadow here.
+ */
+.commit-history-hero-card--geometry-ready > .repo-card--history-flight {
+  position: relative;
+  z-index: 1;
+  background: transparent;
+  border-color: transparent;
+}
+
+/*
+ * The live-DOM Hero keeps Dashboard operational chrome absent while opening,
+ * settled, or closing. The returning Hero keeps the same compact anatomy until
+ * the source-card handoff; Dashboard chrome is revealed only after the flight
+ * owner has reached the resting card. Both flight observation and completion
+ * validate the compact Hero's left/top/width endpoint, while the latest source
+ * height is read separately during handoff.
+ */
+.commit-history-hero-card--preparing.commit-history-hero-card--opening
+  > .repo-card--history-flight
+  > :is(.sync-info, .repo-card__branch-attention, .repo-card__state-callout, .repo-card__missing-overlay, .repo-card__actions-wrap),
+.commit-history-hero-card--geometry-ready.commit-history-hero-card--opening
+  > .repo-card--history-flight
+  > :is(.sync-info, .repo-card__branch-attention, .repo-card__state-callout, .repo-card__missing-overlay, .repo-card__actions-wrap),
+.commit-history-hero-card--settled
+  > .repo-card--history-flight
+  > :is(.sync-info, .repo-card__branch-attention, .repo-card__state-callout, .repo-card__missing-overlay, .repo-card__actions-wrap),
+.commit-history-hero-card--preparing.commit-history-hero-card--closing
+  > .repo-card--history-flight
+  > :is(.sync-info, .repo-card__branch-attention, .repo-card__state-callout, .repo-card__missing-overlay, .repo-card__actions-wrap),
+.commit-history-hero-card--geometry-ready.commit-history-hero-card--closing
+  > .repo-card--history-flight
+  > :is(.sync-info, .repo-card__branch-attention, .repo-card__state-callout, .repo-card__missing-overlay, .repo-card__actions-wrap) {
+  display: none;
+}
+
+@keyframes commitHistoryHorizontalSurface {
+  from {
+    clip-path: inset(
+      0
+      calc(
+        max(
+          var(--commit-history-flight-start-width),
+          var(--commit-history-flight-end-width)
+        ) - var(--commit-history-flight-start-width)
+      )
+      0
+      0
+      round var(--radius-lg)
+    );
+  }
+
+  to {
+    clip-path: inset(
+      0
+      calc(
+        max(
+          var(--commit-history-flight-start-width),
+          var(--commit-history-flight-end-width)
+        ) - var(--commit-history-flight-end-width)
+      )
+      0
+      0
+      round var(--radius-lg)
+    );
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .commit-history-hero-card--geometry-ready::before {
+    animation-duration: 1ms;
+  }
+}

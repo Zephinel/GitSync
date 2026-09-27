@@ -1,0 +1,159 @@
+.branch-management-stage {
+  padding: clamp(18px, 3vw, 44px);
+}
+
+.branch-management-stage .branch-management-sheet {
+  width: calc(100vw - clamp(40px, 5vw, 88px));
+  height: calc(100vh - clamp(40px, 7vh, 80px));
+  max-width: 1840px;
+  max-height: 1120px;
+  min-width: min(760px, calc(100vw - 40px));
+  min-height: min(520px, calc(100vh - 40px));
+  transition:
+    width 240ms cubic-bezier(0.16, 1, 0.3, 1),
+    height 240ms cubic-bezier(0.16, 1, 0.3, 1),
+    max-width 240ms cubic-bezier(0.16, 1, 0.3, 1),
+    max-height 240ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.branch-management-stage .branch-management-table__header,
+.branch-management-stage .branch-management-row {
+  grid-template-columns:
+    minmax(220px, 1.45fr)
+    minmax(210px, 1.25fr)
+    minmax(120px, 0.78fr)
+    minmax(130px, 0.76fr)
+    176px !important;
+}
+
+.branch-management-stage .branch-management-table__header--batch,
+.branch-management-stage .branch-management-row--batch {
+  grid-template-columns:
+    30px
+    minmax(220px, 1.45fr)
+    minmax(210px, 1.25fr)
+    minmax(120px, 0.78fr)
+    minmax(130px, 0.76fr)
+    176px !important;
+}
+
+.branch-management-stage .branch-management-row__identity strong,
+.branch-management-stage .branch-management-row__upstream > span,
+.branch-management-stage .branch-management-row__commit code,
+.branch-management-stage .branch-management-row__upstream small,
+.branch-management-stage .branch-management-row__commit small,
+.branch-management-stage .branch-management-row__state small {
+  text-overflow: ellipsis;
+}
+
+@media (min-width: 1800px) {
+  .branch-management-stage .branch-management-sheet {
+    max-width: none;
+    max-height: none;
+  }
+
+  .branch-management-stage .branch-management-table__header,
+  .branch-management-stage .branch-management-row {
+    grid-template-columns:
+      minmax(300px, 1.6fr)
+      minmax(280px, 1.4fr)
+      minmax(160px, 0.82fr)
+      minmax(180px, 0.82fr)
+      176px !important;
+  }
+
+  .branch-management-stage .branch-management-table__header--batch,
+  .branch-management-stage .branch-management-row--batch {
+    grid-template-columns:
+      30px
+      minmax(300px, 1.6fr)
+      minmax(280px, 1.4fr)
+      minmax(160px, 0.82fr)
+      minmax(180px, 0.82fr)
+      176px !important;
+  }
+}
+
+@media (max-width: 1100px) {
+  .branch-management-stage {
+    padding: 14px;
+  }
+
+  .branch-management-stage .branch-management-sheet {
+    width: calc(100vw - 28px);
+    height: calc(100vh - 28px);
+    max-width: none;
+    max-height: none;
+    min-width: 0;
+    min-height: 0;
+  }
+
+  .branch-management-stage .branch-management-table__header,
+  .branch-management-stage .branch-management-row {
+    grid-template-columns:
+      minmax(180px, 1.3fr)
+      minmax(160px, 1.05fr)
+      minmax(100px, 0.7fr)
+      minmax(110px, 0.68fr)
+      176px !important;
+  }
+
+  .branch-management-stage .branch-management-table__header--batch,
+  .branch-management-stage .branch-management-row--batch {
+    grid-template-columns:
+      30px
+      minmax(180px, 1.3fr)
+      minmax(160px, 1.05fr)
+      minmax(100px, 0.7fr)
+      minmax(110px, 0.68fr)
+      176px !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .branch-management-stage {
+    padding: 10px;
+  }
+
+  .branch-management-stage .branch-management-sheet {
+    width: calc(100vw - 20px);
+    height: calc(100vh - 20px);
+  }
+
+  .branch-management-stage .branch-management-table__header,
+  .branch-management-stage .branch-management-row {
+    grid-template-columns:
+      minmax(170px, 1.35fr)
+      minmax(150px, 1fr)
+      minmax(95px, 0.7fr)
+      176px !important;
+  }
+
+  .branch-management-stage .branch-management-table__header--batch,
+  .branch-management-stage .branch-management-row--batch {
+    grid-template-columns:
+      30px
+      minmax(170px, 1.35fr)
+      minmax(150px, 1fr)
+      minmax(95px, 0.7fr)
+      176px !important;
+  }
+}
+
+@media (max-width: 680px) {
+  .branch-management-stage {
+    padding: 6px;
+  }
+
+  .branch-management-stage .branch-management-sheet {
+    width: calc(100vw - 12px);
+    height: calc(100vh - 12px);
+    border-radius: 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .branch-management-stage .branch-management-sheet {
+    transition-duration: 1ms !important;
+  }
+}

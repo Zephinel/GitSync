@@ -1,0 +1,139 @@
+/* Commit Diff file-card surface and file-list chrome. */
+
+.commit-diff-file-list {
+  width: 100%;
+  box-sizing: border-box;
+  /* Match the card shadow blur radius so its lateral fade resolves inside the scrollport. */
+  padding: 22px 18px 40px !important;
+  scroll-padding-block: 10px;
+  scrollbar-gutter: auto;
+}
+
+.commit-diff-file-list > .commit-diff-file-card + .commit-diff-file-card {
+  margin-top: 12px;
+}
+
+.commit-diff-file-card {
+  width: 100%;
+  min-width: 0;
+  min-height: 66px;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px !important;
+  border: 0 !important;
+  border-radius: 13px !important;
+  background: var(--bg-card) !important;
+  box-shadow: var(--app-file-card-shadow) !important;
+  overflow: visible;
+  transform: translateY(0);
+  transition:
+    background var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.commit-diff-file-card:hover,
+.commit-diff-file-card:has(.commit-diff-file-card__content:focus-visible) {
+  border: 0 !important;
+  background: var(--bg-card) !important;
+  box-shadow: var(--app-file-card-hover-shadow) !important;
+  transform: translateY(-1px);
+}
+
+.commit-diff-file-card--selected,
+.commit-diff-file-card--selected:hover,
+.commit-diff-file-card--selected:has(.commit-diff-file-card__content:focus-visible) {
+  border: 0 !important;
+  background: color-mix(in srgb, var(--accent-blue) 5%, var(--bg-card) 95%) !important;
+}
+
+.commit-diff-file-card__content {
+  width: 100%;
+  min-width: 0;
+  min-height: 42px;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  outline: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--text-secondary);
+  text-align: left;
+  cursor: pointer;
+  transform: none !important;
+}
+
+.commit-diff-file-card__content:hover,
+.commit-diff-file-card__content[aria-pressed='true'] {
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.commit-diff-file-card__content:focus-visible {
+  outline: 0 !important;
+}
+
+.commit-diff-file-card__prefix {
+  width: 18px;
+  min-width: 18px;
+  display: grid;
+  place-items: center;
+  justify-self: start;
+}
+
+.commit-diff-file-card__actions {
+  min-width: 0;
+  justify-self: end;
+}
+
+.commit-diff-file-card .commit-diff-file-glyph {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  border-color: color-mix(in srgb, var(--border-subtle) 90%, var(--text-tertiary) 10%) !important;
+  background: transparent !important;
+  color: var(--text-secondary) !important;
+  box-shadow: none !important;
+}
+
+.commit-diff-file-card .commit-diff-file-item__badge {
+  min-width: 27px;
+  height: 23px;
+  border-radius: 8px;
+  border-color: color-mix(in srgb, var(--border-subtle) 90%, var(--text-tertiary) 10%);
+  background: transparent;
+}
+
+/* The list pane is separated by layout and background, never by a vertical rule. */
+.commit-diff-body--designed .commit-diff-sidebar,
+.commit-diff-body--focus-sidebar-visible .commit-diff-sidebar,
+.working-changes-sheet .commit-diff-sidebar {
+  border: 0 !important;
+  border-right: 0 !important;
+  border-right-color: transparent !important;
+}
+
+/* The working-tree header has only one action, so it should hug the true right edge. */
+.working-changes-sheet .commit-diff-header--designed {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.working-changes-sheet .commit-diff-header__actions {
+  grid-column: 2;
+  grid-row: 1;
+  justify-self: end;
+  align-self: start;
+  justify-content: flex-end;
+  min-width: 36px;
+}

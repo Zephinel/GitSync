@@ -1,0 +1,100 @@
+.app-bootstrap-root {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg-primary);
+}
+
+.app-bootstrap-shell {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  background: var(--bg-primary);
+}
+
+.app-bootstrap-shell .dashboard-loading {
+  width: 100%;
+  min-height: 100%;
+  padding: 24px;
+}
+
+.app-bootstrap-root .app-layout {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  min-height: 0;
+}
+
+.app-bootstrap-error {
+  position: absolute;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 32px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.app-bootstrap-error__panel {
+  width: min(560px, 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 24px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-elevated);
+}
+
+.app-bootstrap-error__panel strong {
+  font-size: 16px;
+}
+
+.app-bootstrap-error__panel p {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.app-bootstrap-error__panel code {
+  max-height: 180px;
+  overflow: auto;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-elevated);
+  color: var(--status-error);
+  font-size: 11px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.app-bootstrap-error__panel button {
+  align-self: flex-start;
+  min-height: 34px;
+  padding: 0 14px;
+  border: 1px solid var(--accent-blue);
+  border-radius: var(--radius-sm);
+  background: var(--accent-blue);
+  color: #fff;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-bootstrap-shell .dashboard-loading__line,
+  .app-bootstrap-shell .dashboard-loading__pill {
+    animation: none !important;
+  }
+}

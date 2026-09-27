@@ -1,0 +1,15 @@
+.stash-manager-list {
+  overflow-anchor: none;
+}
+
+.stash-manager-item {
+  content-visibility: auto;
+  contain: layout paint style;
+  contain-intrinsic-size: 76px;
+}
+
+@media (max-width: 720px) {
+  .stash-manager-item {
+    contain-intrinsic-size: 128px;
+  }
+}

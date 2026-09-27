@@ -1,0 +1,178 @@
+/*
+ * Canonical secondary-window viewport contract.
+ *
+ * Centered overlays/stages own the viewport safe inset. Their child surfaces
+ * consume that content box instead of independently subtracting vw/vh. This
+ * keeps top/bottom/side spacing symmetric in short, narrow, and wide windows.
+ */
+:root {
+  --secondary-window-safe-inset: clamp(12px, 2.5vmin, 28px);
+}
+
+/* Shared legacy modal host (conflicts, import, auth, clone, logs, guards). */
+.modal-overlay {
+  padding: var(--secondary-window-safe-inset);
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.modal-overlay > .conflict-dialog {
+  width: min(640px, 100%);
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.modal-overlay > .import-result-dialog {
+  width: min(860px, 100%);
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.modal-overlay > .sync-guard-dialog {
+  width: min(760px, 100%);
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.modal-overlay > .script-log-dialog {
+  width: min(980px, 100%);
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.modal-overlay > .clone-dialog {
+  width: min(620px, 100%);
+  max-width: 100%;
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-overlay > .device-auth-dialog {
+  width: min(420px, 100%);
+  max-width: 100%;
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-overlay > .github-repo-browser {
+  width: min(940px, 100%);
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.modal-overlay > .clone-dialog .clone-dialog__body,
+.modal-overlay > .device-auth-dialog .device-auth-dialog__body {
+  min-height: 0;
+  overflow: auto;
+}
+
+/* Stash surfaces share the same centered-modal contract. */
+.stash-manager-backdrop {
+  padding: var(--secondary-window-safe-inset);
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.stash-manager-backdrop > .stash-manager-dialog {
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.stash-manager-backdrop > .stash-manager-dialog.create-stash-dialog {
+  width: min(760px, 100%);
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.stash-manager-confirm-backdrop {
+  padding: var(--secondary-window-safe-inset);
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.stash-manager-confirm-backdrop > .stash-manager-confirm {
+  width: min(560px, 100%);
+  max-width: 100%;
+  max-height: 100%;
+  overflow: auto;
+}
+
+/* Branch creation: backdrop owns the inset, dialog owns only design maxima. */
+.branch-creation-backdrop {
+  padding: var(--secondary-window-safe-inset);
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.branch-creation-backdrop > .branch-creation-dialog {
+  width: min(920px, 100%);
+  max-width: 100%;
+  max-height: 100%;
+}
+
+/* Branch complete view: stage is the only viewport sizing authority. */
+body .branch-management-stage {
+  padding: var(--secondary-window-safe-inset);
+  box-sizing: border-box;
+}
+
+body .branch-management-stage > .branch-management-sheet {
+  width: min(1840px, 100%);
+  height: min(1120px, 100%);
+  max-width: 100%;
+  max-height: 100%;
+  min-width: min(760px, 100%);
+  min-height: min(520px, 100%);
+}
+
+body .branch-management-confirm-backdrop {
+  padding: var(--secondary-window-safe-inset);
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+body .branch-management-confirm-backdrop > .branch-management-confirm {
+  width: min(480px, 100%);
+  max-width: 100%;
+  max-height: 100%;
+}
+
+/* The compact Stash menu is a viewport portal, not an ancestor-clipped popover. */
+.stash-management-popover.stash-management-popover--viewport {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: auto;
+  width: min(320px, calc(100vw - 24px));
+  max-height: none;
+  overflow: hidden;
+  z-index: calc(var(--z-stash-entry-action-menu, 762) - 1);
+}
+
+.stash-management-popover.stash-management-popover--viewport .stash-management-popover__body {
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+@media (min-width: 1800px) {
+  body .branch-management-stage > .branch-management-sheet {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+@media (max-width: 760px) {
+  :root {
+    --secondary-window-safe-inset: 10px;
+  }
+
+  .branch-creation-backdrop > .branch-creation-dialog,
+  .stash-manager-backdrop > .stash-manager-dialog.create-stash-dialog {
+    width: 100%;
+    max-width: 100%;
+    max-height: 100%;
+  }
+}

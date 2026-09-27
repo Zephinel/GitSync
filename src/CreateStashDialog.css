@@ -1,0 +1,196 @@
+.create-stash-dialog {
+  width: min(760px, calc(100vw - 32px));
+  max-height: min(860px, calc(100vh - 32px));
+}
+
+.create-stash-state {
+  min-height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  color: var(--text-tertiary);
+  font-size: 11px;
+}
+
+.create-stash-error,
+.create-stash-blocked {
+  margin: 14px 20px 0;
+  padding: 11px 12px;
+  border: 1px solid color-mix(in srgb, var(--status-error) 34%, var(--border-default));
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--status-error) 8%, var(--bg-input));
+  color: var(--status-error);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.create-stash-content {
+  min-height: 0;
+  display: grid;
+  gap: 14px;
+  overflow: auto;
+  padding: 18px 20px 20px;
+}
+
+.create-stash-summary,
+.create-stash-counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.create-stash-summary span,
+.create-stash-counts span {
+  padding: 6px 9px;
+  border-radius: 8px;
+  background: var(--bg-input);
+  color: var(--text-secondary);
+  font-size: 11px;
+}
+
+.create-stash-files {
+  max-height: 250px;
+  display: grid;
+  gap: 7px;
+  overflow: auto;
+  padding: 11px;
+  border-radius: 11px;
+  background: color-mix(in srgb, var(--bg-input) 82%, transparent);
+}
+
+.create-stash-files > div {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 7px;
+  content-visibility: auto;
+  contain: layout paint style;
+  contain-intrinsic-size: 28px;
+}
+
+.create-stash-files code {
+  overflow-wrap: anywhere;
+  color: var(--text-primary);
+}
+
+.create-stash-files small {
+  color: var(--text-tertiary);
+}
+
+.create-stash-options {
+  display: grid;
+  gap: 8px;
+}
+
+.create-stash-options .create-stash-option {
+  min-width: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 11px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: var(--bg-input);
+  color: var(--text-secondary);
+  font-size: 11px;
+  cursor: pointer;
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.create-stash-options .create-stash-option:hover:not(.create-stash-option--disabled) {
+  border-color: color-mix(in srgb, var(--accent-blue) 34%, var(--border-default));
+  background: color-mix(in srgb, var(--accent-blue) 6%, var(--bg-input));
+}
+
+.create-stash-options .create-stash-option > span:not(.canonical-checkbox__box) {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.create-stash-options .create-stash-option strong {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  color: var(--text-primary);
+  font-size: 11px;
+}
+
+.create-stash-options label strong em {
+  padding: 2px 5px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent-blue) 10%, transparent);
+  color: var(--accent-blue);
+  font-size: 8px;
+  font-style: normal;
+  font-weight: 750;
+  letter-spacing: 0.02em;
+}
+
+.create-stash-options label small,
+.create-stash-options p {
+  margin: 0;
+  color: var(--text-tertiary);
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.create-stash-option--disabled {
+  cursor: not-allowed !important;
+  opacity: 0.62;
+}
+
+.create-stash-option--disabled strong {
+  color: var(--text-secondary) !important;
+}
+
+.create-stash-options p {
+  padding: 10px 11px;
+  border: 1px solid color-mix(in srgb, var(--accent-blue) 26%, var(--border-default));
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--accent-blue) 7%, var(--bg-input));
+  color: var(--text-secondary);
+}
+
+.create-stash-confirm {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid color-mix(in srgb, var(--status-warning) 34%, var(--border-default));
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--status-warning) 8%, var(--bg-input));
+  color: var(--status-warning);
+  font-size: 11px;
+}
+
+.create-stash-confirm p {
+  margin: 0;
+  line-height: 1.55;
+}
+
+.create-stash-confirm > div,
+.create-stash-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.create-stash-dialog .stash-manager-result {
+  display: grid;
+  gap: 6px;
+}
+
+.create-stash-dialog .stash-manager-result span,
+.create-stash-dialog .stash-manager-result code {
+  display: block;
+}
+
+@media (max-width: 640px) {
+  .create-stash-content {
+    padding-inline: 14px;
+  }
+}

@@ -1,0 +1,407 @@
+name: Release on Tag
+
+on:
+  push:
+    tags:
+      - "v*"
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  verify-version:
+    name: Verify tag and app version
+    runs-on: ubuntu-latest
+    outputs:
+      app_version: ${{ steps.verify.outputs.app_version }}
+      tag: ${{ steps.verify.outputs.tag }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.sha }}
+
+      - name: Verify version consistency
+        id: verify
+        run: |
+          set -euo pipefail
+
+          APP_VERSION="$(jq -r '.version' src-tauri/tauri.conf.json)"
+          PKG_VERSION="$(jq -r '.version' package.json)"
+          CARGO_VERSION="$(awk -F '"' '/^version = / { print $2; exit }' src-tauri/Cargo.toml)"
+          TAG_NAME="${GITHUB_REF_NAME}"
+          EXPECTED_TAG="v${APP_VERSION}"
+
+          if [ "${APP_VERSION}" != "${PKG_VERSION}" ]; then
+            echo "Version mismatch: src-tauri/tauri.conf.json=${APP_VERSION}, package.json=${PKG_VERSION}"
+            exit 1
+          fi
+
+          if [ "${APP_VERSION}" != "${CARGO_VERSION}" ]; then
+            echo "Version mismatch: src-tauri/tauri.conf.json=${APP_VERSION}, src-tauri/Cargo.toml=${CARGO_VERSION}"
+            exit 1
+          fi
+
+          if [ "${TAG_NAME}" != "${EXPECTED_TAG}" ]; then
+            echo "Tag mismatch: got ${TAG_NAME}, expected ${EXPECTED_TAG}"
+            exit 1
+          fi
+
+          echo "app_version=${APP_VERSION}" >> "${GITHUB_OUTPUT}"
+          echo "tag=${TAG_NAME}" >> "${GITHUB_OUTPUT}"
+
+  checks:
+    name: Test frontend and backend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.sha }}
+
+      - name: Install Linux desktop dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev \
+            patchelf \
+            libssl-dev \
+            pkg-config
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit tests
+        run: npm test
+
+      - name: Build frontend
+        run: npm run build
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+
+      - name: Check Rust formatting
+        run: cargo fmt --manifest-path src-tauri/Cargo.toml --check
+
+      - name: Check Rust
+        run: cargo check --manifest-path src-tauri/Cargo.toml
+
+      - name: Run Rust tests
+        run: cargo test --manifest-path src-tauri/Cargo.toml
+
+  build-release:
+    name: Build release (${{ matrix.label }})
+    needs:
+      - verify-version
+      - checks
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-15
+            label: macOS DMG (Apple Silicon)
+            artifact_name: release-macos-dmg
+            artifact_path: |
+              src-tauri/target/release/bundle/dmg/*.dmg
+              src-tauri/target/release/bundle/macos/*.app.tar.gz*
+              src-tauri/target/release/bundle/macos/updater-build-target.txt
+              src-tauri/target/release/bundle/macos/updater-build-target-darwin-aarch64.txt
+          - os: windows-latest
+            label: Windows Portable EXE + NSIS Installer (x64)
+            artifact_name: release-windows-bundles
+            artifact_path: |
+              src-tauri/target/release/GitSync.exe
+              src-tauri/target/release/bundle/nsis/GitSync-setup.exe
+              src-tauri/target/release/bundle/nsis/GitSync-setup.exe.sig
+              src-tauri/target/release/bundle/nsis/updater-build-target-windows-x86_64.txt
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.sha }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri -> target
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Verify Apple Silicon runner
+        if: startsWith(matrix.os, 'macos')
+        run: |
+          set -euo pipefail
+          if [ "$(uname -m)" != "arm64" ]; then
+            echo "Expected an Apple Silicon runner; got $(uname -m)"
+            exit 1
+          fi
+
+      - name: Require updater signing key
+        shell: bash
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+        run: |
+          set -euo pipefail
+          if [ -z "${TAURI_SIGNING_PRIVATE_KEY:-}" ]; then
+            echo "::error::Configure the TAURI_SIGNING_PRIVATE_KEY repository secret before publishing updater-enabled releases."
+            exit 1
+          fi
+
+      - name: Check macOS signing and notarization configuration
+        id: mac_signing
+        if: startsWith(matrix.os, 'macos')
+        run: |
+          set -euo pipefail
+          required=(APPLE_CERTIFICATE APPLE_CERTIFICATE_PASSWORD APPLE_SIGNING_IDENTITY APPLE_ID APPLE_PASSWORD APPLE_TEAM_ID)
+          missing=()
+          for key in "${required[@]}"; do
+            if [ -z "${!key:-}" ]; then
+              missing+=("$key")
+            fi
+          done
+
+          if [ "${#missing[@]}" -gt 0 ]; then
+            echo "macOS signing/notarization secrets are not configured (${missing[*]}). Continuing with unsigned macOS build."
+            echo "has_signing=false" >> "${GITHUB_OUTPUT}"
+          else
+            echo "has_signing=true" >> "${GITHUB_OUTPUT}"
+          fi
+        env:
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+
+      - name: Build desktop app (release, windows)
+        if: matrix.os == 'windows-latest'
+        run: npm run tauri build
+        env:
+          GITSYNC_GITHUB_CLIENT_ID: ${{ secrets.GITSYNC_GITHUB_CLIENT_ID }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+
+      - name: Build desktop app (release, macOS unsigned)
+        if: startsWith(matrix.os, 'macos') && steps.mac_signing.outputs.has_signing != 'true'
+        run: npm run tauri build
+        env:
+          GITSYNC_GITHUB_CLIENT_ID: ${{ secrets.GITSYNC_GITHUB_CLIENT_ID }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+
+      - name: Build desktop app (release, macOS signed)
+        if: startsWith(matrix.os, 'macos') && steps.mac_signing.outputs.has_signing == 'true'
+        run: npm run tauri build
+        env:
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          GITSYNC_GITHUB_CLIENT_ID: ${{ secrets.GITSYNC_GITHUB_CLIENT_ID }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+
+      - name: Verify macOS updater artifact architecture
+        if: startsWith(matrix.os, 'macos')
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          updater_archives=(src-tauri/target/release/bundle/macos/*.app.tar.gz)
+          if [ "${#updater_archives[@]}" -ne 1 ]; then
+            echo "Expected exactly one macOS updater archive; found ${#updater_archives[@]}"
+            exit 1
+          fi
+
+          app_contents="$(mktemp -d)"
+          trap 'rm -rf "${app_contents}"' EXIT
+          tar -xzf "${updater_archives[0]}" -C "${app_contents}"
+          app_binary="$(find "${app_contents}" -path '*/Contents/MacOS/GitSync' -type f -print -quit)"
+          if [ ! -f "${app_binary}" ]; then
+            echo "Expected GitSync app executable is missing from ${updater_archives[0]}"
+            exit 1
+          fi
+          architectures="$(lipo -archs "${app_binary}")"
+          if [ "${architectures}" != "arm64" ]; then
+            echo "Expected darwin-aarch64 artifact; got executable architectures: ${architectures}"
+            exit 1
+          fi
+          mkdir -p src-tauri/target/release/bundle/macos
+          echo "darwin-aarch64" > src-tauri/target/release/bundle/macos/updater-build-target.txt
+          echo "darwin-aarch64" > src-tauri/target/release/bundle/macos/updater-build-target-darwin-aarch64.txt
+
+      - name: Verify and stage Windows NSIS updater artifact
+        if: startsWith(matrix.os, 'windows')
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+
+          host_target="$(rustc -vV | sed -n 's/^host: //p')"
+          if [ "${host_target}" != "x86_64-pc-windows-msvc" ]; then
+            echo "Expected x86_64-pc-windows-msvc; got ${host_target}"
+            exit 1
+          fi
+
+          nsis_dir="src-tauri/target/release/bundle/nsis"
+          setup_files=("${nsis_dir}"/*-setup.exe)
+          if [ "${#setup_files[@]}" -ne 1 ]; then
+            echo "Expected exactly one x64 NSIS setup executable; found ${#setup_files[@]}"
+            exit 1
+          fi
+
+          signature="${setup_files[0]}.sig"
+          if [ ! -s "${signature}" ]; then
+            echo "NSIS updater signature is missing or empty: ${signature}"
+            exit 1
+          fi
+
+          staged_setup="${nsis_dir}/GitSync-setup.exe"
+          staged_signature="${staged_setup}.sig"
+          if [ "${setup_files[0]}" != "${staged_setup}" ]; then
+            cp "${setup_files[0]}" "${staged_setup}"
+            cp "${signature}" "${staged_signature}"
+          fi
+          echo "windows-x86_64" > "${nsis_dir}/updater-build-target-windows-x86_64.txt"
+
+      - name: Upload release bundles
+        uses: actions/upload-artifact@v6
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: ${{ matrix.artifact_path }}
+          if-no-files-found: error
+
+  publish-release:
+    name: Publish GitHub Release
+    needs:
+      - verify-version
+      - build-release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.sha }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+
+      - name: Install release script dependencies
+        run: npm ci
+
+      - name: Download release bundles
+        uses: actions/download-artifact@v8
+        with:
+          pattern: release-*
+          path: release-assets
+          merge-multiple: true
+
+      - name: Create signed public updater manifest
+        env:
+          APP_VERSION: ${{ needs.verify-version.outputs.app_version }}
+          TAG: ${{ needs.verify-version.outputs.tag }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: node scripts/create-updater-manifest.mjs
+
+      - name: Stage, verify, and publish Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          TAG: ${{ needs.verify-version.outputs.tag }}
+          APP_VERSION: ${{ needs.verify-version.outputs.app_version }}
+        run: |
+          set -euo pipefail
+          if [ "${GH_REPO}" != "Zephinel/GitSync" ]; then
+            echo "::error::Release workflow is restricted to Zephinel/GitSync."
+            exit 1
+          fi
+
+          verify_tag_identity() {
+            EXPECTED_GITHUB_SHA="${GITHUB_SHA}" GITHUB_TOKEN="${GH_TOKEN}" \
+              node scripts/verify-release-tag-identity.mjs >/dev/null
+          }
+          verify_tag_identity
+
+          mapfile -t assets < <(find release-assets -type f \( \
+            -name '*.dmg' -o -name 'GitSync.exe' \
+            -o -name 'GitSync-setup.exe' -o -name 'GitSync-setup.exe.sig' \
+            -o -name '*.app.tar.gz' -o -name '*.app.tar.gz.sig' \
+            -o -name 'latest.json' \) | sort)
+          if [ "${#assets[@]}" -ne 7 ]; then
+            echo "::error::Expected seven validated Release assets; found ${#assets[@]}."
+            exit 1
+          fi
+
+          jq -r '.notes' release-assets/latest.json > release-notes.md
+          release_state=release-assets/remote-release.json
+          if gh api "/repos/${GH_REPO}/releases/tags/${TAG}" > "${release_state}" 2>/dev/null; then
+            if ! jq -e '.draft == true and (.assets | length) == 0' "${release_state}" >/dev/null; then
+              echo "::error::Release already exists with assets or is published; refusing to overwrite it."
+              exit 1
+            fi
+            gh release edit "${TAG}" --repo "${GH_REPO}" \
+              --title "GitSync ${TAG}" --notes-file release-notes.md
+          else
+            gh release create "${TAG}" --repo "${GH_REPO}" \
+              --verify-tag --draft --title "GitSync ${TAG}" \
+              --notes-file release-notes.md
+          fi
+
+          verify_tag_identity
+          gh release upload "${TAG}" --repo "${GH_REPO}" "${assets[@]}"
+          gh api "/repos/${GH_REPO}/releases/tags/${TAG}" > "${release_state}"
+          node scripts/validate-release-state.mjs "${release_state}" draft release-assets
+
+          manifest_asset_id="$(
+            jq -r '[.assets[] | select(.name == "latest.json")] | if length == 1 then .[0].id else error("missing latest.json") end' "${release_state}"
+          )"
+          node scripts/download-release-asset.mjs "${manifest_asset_id}" release-assets/latest-remote.json
+          cmp release-assets/latest.json release-assets/latest-remote.json
+
+          verify_tag_identity
+          release_id="$(jq -r '.id' "${release_state}")"
+          gh api --method PATCH "/repos/${GH_REPO}/releases/${release_id}" \
+            -F draft=false >/dev/null
+          gh api "/repos/${GH_REPO}/releases/${release_id}" > "${release_state}"
+          node scripts/validate-release-state.mjs "${release_state}" published release-assets
+
+          curl --fail --location --silent --show-error \
+            --retry 6 --retry-all-errors --retry-delay 5 --max-time 30 \
+            "https://github.com/${GH_REPO}/releases/latest/download/latest.json" \
+            --output release-assets/latest-public.json
+          cmp release-assets/latest.json release-assets/latest-public.json

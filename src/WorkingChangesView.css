@@ -1,0 +1,319 @@
+.repo-card__state-callout--warning {
+  gap: 10px;
+}
+
+.repo-card__working-changes-action {
+  flex: 0 0 auto;
+  height: 30px;
+  margin-left: auto;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--status-warning) 9%, transparent);
+  color: var(--status-warning);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast);
+}
+
+.repo-card__working-changes-action:hover {
+  background: color-mix(in srgb, var(--status-warning) 16%, transparent);
+}
+
+.working-changes-stage {
+  z-index: 760;
+}
+
+.working-changes-sheet {
+  grid-template-rows: auto auto auto minmax(0, 1fr);
+}
+
+.working-changes-toolbar {
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 9px 18px;
+  border-bottom: 1px solid var(--border-subtle);
+  background: color-mix(in srgb, var(--bg-input) 58%, transparent);
+}
+
+.working-changes-toolbar__selection,
+.working-changes-toolbar__actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.working-changes-toolbar__selection {
+  color: var(--text-secondary);
+  font-size: 11px;
+}
+
+.working-changes-toolbar__selection strong {
+  color: var(--text-primary);
+}
+
+.working-changes-action {
+  min-width: 108px;
+  height: 32px;
+  padding: 0 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 0;
+  border-radius: 9px;
+  background: var(--app-action-surface-background);
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast);
+}
+
+.working-changes-action .icon {
+  width: 15px;
+  height: 15px;
+}
+
+.working-changes-action--discard {
+  color: var(--status-error);
+}
+
+.working-changes-action--discard:hover:not(:disabled) {
+  background: var(--status-error-bg);
+}
+
+.working-changes-action--discard-all {
+  background: color-mix(in srgb, var(--status-error) 7%, var(--app-action-surface-background));
+}
+
+.working-changes-action--commit {
+  color: var(--accent-blue);
+}
+
+.working-changes-action--commit:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--accent-blue) 12%, transparent);
+}
+
+.working-changes-action:disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
+}
+
+.working-changes-action:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.working-changes-notice {
+  padding: 8px 18px;
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.working-changes-notice--success {
+  color: var(--status-success);
+  background: var(--status-success-bg);
+}
+
+.working-changes-notice--danger {
+  color: var(--status-error);
+  background: var(--status-error-bg);
+}
+
+.working-changes-body {
+  min-height: 0;
+}
+
+.working-changes-checkbox {
+  width: 18px;
+  height: 18px;
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+  cursor: pointer;
+}
+
+.working-changes-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 840;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(5, 7, 12, 0.7);
+  backdrop-filter: blur(8px);
+  animation: workingChangesDialogBackdropIn 160ms ease both;
+}
+
+.working-changes-dialog {
+  width: min(500px, calc(100vw - 48px));
+  max-height: min(680px, calc(100vh - 48px));
+  padding: 20px;
+  border: 1px solid var(--border-default);
+  border-radius: 16px;
+  background: var(--bg-elevated);
+  box-shadow: var(--shadow-elevated);
+  animation: workingChangesDialogIn 220ms cubic-bezier(0.18, 0.88, 0.2, 1) both;
+}
+
+.working-changes-dialog header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.working-changes-dialog__icon {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border-radius: 12px;
+  background: var(--status-error-bg);
+  color: var(--status-error);
+}
+
+.working-changes-dialog__icon--commit {
+  background: color-mix(in srgb, var(--accent-blue) 12%, var(--bg-input));
+  color: var(--accent-blue);
+}
+
+.working-changes-dialog h3 {
+  color: var(--text-primary);
+  font-size: 16px;
+}
+
+.working-changes-dialog p {
+  margin-top: 5px;
+  color: var(--text-secondary);
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.working-changes-dialog textarea {
+  width: 100%;
+  min-height: 112px;
+  margin-top: 18px;
+  padding: 11px 12px;
+  resize: vertical;
+  border: 1px solid var(--border-default);
+  border-radius: 10px;
+  outline: none;
+  background: var(--bg-input);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.working-changes-dialog textarea:focus {
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-blue) 14%, transparent);
+}
+
+.working-changes-dialog__warning {
+  margin-top: 18px;
+  padding: 12px;
+  border: 1px solid color-mix(in srgb, var(--status-error) 36%, var(--border-default));
+  border-radius: 10px;
+  background: var(--status-error-bg);
+  color: var(--status-error);
+  font-size: 12px;
+}
+
+.working-changes-dialog footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 9px;
+  margin-top: 20px;
+}
+
+.working-changes-dialog footer button {
+  min-width: 90px;
+  height: 34px;
+  flex: 0 0 auto;
+  padding-inline: 16px;
+  border: 0;
+  border-radius: 9px;
+  background: var(--app-action-surface-background);
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.working-changes-dialog footer button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.working-changes-dialog footer .working-changes-dialog__primary {
+  background: color-mix(in srgb, var(--accent-blue) 12%, transparent);
+  color: var(--accent-blue);
+}
+
+.working-changes-dialog footer .working-changes-dialog__danger {
+  background: var(--status-error-bg);
+  color: var(--status-error);
+}
+
+@keyframes workingChangesDialogBackdropIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes workingChangesDialogIn {
+  from { opacity: 0; transform: translateY(10px) scale(0.975); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.app-overlay-slot[data-overlay-presence='exiting'] .working-changes-dialog-backdrop {
+  animation: workingChangesDialogBackdropOut var(--motion-overlay-exit-duration) ease both;
+}
+
+.app-overlay-slot[data-overlay-presence='exiting'] .working-changes-dialog {
+  animation: workingChangesDialogOut var(--motion-overlay-exit-duration) var(--motion-overlay-exit-ease) both;
+}
+
+@keyframes workingChangesDialogBackdropOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes workingChangesDialogOut {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to { opacity: 0; transform: translateY(8px) scale(0.985); }
+}
+
+@media (max-width: 760px) {
+  .working-changes-toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .working-changes-toolbar__actions {
+    width: 100%;
+  }
+
+  .working-changes-action {
+    flex: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .working-changes-dialog-backdrop,
+  .working-changes-dialog,
+  .app-overlay-slot[data-overlay-presence='exiting'] .working-changes-dialog-backdrop,
+  .app-overlay-slot[data-overlay-presence='exiting'] .working-changes-dialog {
+    animation-duration: 1ms !important;
+  }
+}

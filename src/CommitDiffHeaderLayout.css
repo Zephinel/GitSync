@@ -1,0 +1,375 @@
+.commit-diff-header--designed {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 124px;
+  align-items: start;
+  column-gap: 20px;
+  min-height: 94px;
+  padding: 12px 24px 10px;
+}
+
+.commit-diff-header__identity {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  gap: 4px 14px;
+  align-items: start;
+}
+
+.commit-diff-brand-mark {
+  grid-column: 1;
+  grid-row: 1;
+  align-self: start;
+  width: 42px;
+  height: 42px;
+  border-radius: 11px;
+}
+
+.commit-diff-header__main {
+  grid-column: 2;
+  grid-row: 1;
+  min-width: 0;
+  width: 100%;
+  align-self: center;
+}
+
+.commit-diff-header__title-row {
+  min-width: 0;
+  width: 100%;
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr);
+  align-items: center;
+  column-gap: 12px;
+}
+
+.commit-diff-header__app-name {
+  flex: 0 1 auto;
+  max-width: min(240px, 24vw);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-primary);
+  font-size: 20px;
+  font-weight: 850;
+}
+
+.commit-diff-header--designed .commit-diff-header__hash {
+  height: 26px;
+  padding: 0 11px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+.commit-diff-header--designed .commit-diff-header__title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 19px;
+  line-height: 1.25;
+}
+
+.commit-diff-header__meta.commit-diff-header__meta--designed {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  min-width: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: nowrap;
+  gap: clamp(14px, 1.35vw, 24px);
+  overflow: hidden;
+}
+
+.commit-diff-meta-item {
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.commit-diff-meta-item__text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.commit-diff-meta-item--author {
+  flex: 0 0 auto;
+  max-width: 160px;
+}
+
+.commit-diff-meta-item--time {
+  flex: 0 0 auto;
+  width: auto;
+  max-width: none;
+}
+
+.commit-diff-meta-item--branch {
+  flex: 0 1 auto;
+  width: auto;
+  max-width: min(360px, 28vw);
+}
+
+.commit-diff-meta-item--files {
+  flex: 0 0 auto;
+}
+
+.commit-diff-header__delta {
+  min-width: 0;
+  flex: 0 0 auto;
+}
+
+.commit-diff-header__actions {
+  grid-column: 2;
+  grid-row: 1;
+  justify-self: start;
+  align-self: start;
+  margin-top: 0;
+  display: inline-flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 8px;
+}
+
+.commit-diff-header__icon-btn.github-repo-browser__close {
+  width: 36px;
+  min-width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: 10px;
+}
+
+.commit-diff-header__focus[aria-pressed='true'] {
+  background: color-mix(in srgb, var(--accent-blue) 14%, var(--bg-elevated) 86%);
+  color: var(--accent-blue);
+}
+
+.commit-diff-sheet--focus .commit-diff-header__meta.commit-diff-header__meta--designed {
+  gap: clamp(10px, 1vw, 16px);
+}
+
+.commit-diff-sheet--focus .commit-diff-header__identity {
+  grid-column: 1 / -1;
+  grid-row: 1;
+}
+
+.commit-diff-sheet--focus .commit-diff-header__main {
+  padding-right: 136px;
+  box-sizing: border-box;
+}
+
+.commit-diff-sheet--focus .commit-diff-meta-item--branch {
+  flex: 1 1 220px;
+  max-width: min(320px, 24vw);
+  overflow: hidden;
+}
+
+.commit-diff-header-controls {
+  min-width: max-content;
+  margin-left: auto;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  animation: commitDiffHeaderControlsIn 180ms ease both;
+}
+
+.commit-diff-header-controls .commit-diff-file-header__actions {
+  min-width: 0;
+}
+
+.commit-diff-file-header--designed {
+  min-height: 64px;
+  padding: 10px 24px;
+}
+
+.commit-diff-body--designed {
+  --commit-diff-focus-sidebar-width: 0px;
+  --commit-diff-focus-sidebar-max-width: 320px;
+  position: relative;
+  transition: grid-template-columns 240ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.commit-diff-body--focus {
+  grid-template-columns: var(--commit-diff-focus-sidebar-width) minmax(0, 1fr);
+}
+
+.commit-diff-body--focus-sidebar-dragging {
+  transition: none;
+}
+
+.commit-diff-body--focus .commit-diff-sidebar {
+  display: flex;
+  min-width: 0;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateX(-14px);
+  pointer-events: none;
+  transition:
+    opacity 180ms ease,
+    transform 240ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.commit-diff-body--focus-sidebar-visible .commit-diff-sidebar {
+  display: flex;
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
+}
+
+.commit-diff-sidebar-handle {
+  position: absolute;
+  z-index: 2;
+  left: clamp(10px, calc(var(--commit-diff-focus-sidebar-width) - 10px), calc(var(--commit-diff-focus-sidebar-max-width) - 10px));
+  top: 50%;
+  width: 18px;
+  height: 78px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: var(--bg-card);
+  background: color-mix(in srgb, var(--bg-card) 88%, transparent);
+  color: var(--text-tertiary);
+  box-shadow:
+    0 8px 22px rgba(0, 0, 0, 0.1),
+    0 1px 0 rgba(255, 255, 255, 0.06) inset;
+  cursor: ew-resize;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: none;
+  user-select: none;
+  animation: commitDiffHandleIn 180ms ease both;
+  transition:
+    left 240ms cubic-bezier(0.16, 1, 0.3, 1),
+    color var(--transition-fast),
+    background var(--transition-fast),
+    transform 180ms ease;
+  transform: translateY(-50%);
+}
+
+.commit-diff-sidebar-handle:hover,
+.commit-diff-sidebar-handle--visible {
+  background: color-mix(in srgb, var(--accent-blue) 10%, var(--bg-card) 90%);
+  color: var(--accent-blue);
+}
+
+.commit-diff-sidebar-handle--dragging {
+  background: color-mix(in srgb, var(--accent-blue) 10%, var(--bg-card) 90%);
+  color: var(--accent-blue);
+  transition:
+    color var(--transition-fast),
+    background var(--transition-fast),
+    transform 180ms ease;
+}
+
+.commit-diff-sidebar-handle__bar {
+  width: 4px;
+  height: 34px;
+  border-radius: 999px;
+  background: currentColor;
+}
+
+@keyframes commitDiffHeaderControlsIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes commitDiffHandleIn {
+  from {
+    opacity: 0;
+    transform: translate(-4px, -50%);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(0, -50%);
+  }
+}
+
+@media (max-width: 900px) {
+  .commit-diff-header--designed {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 10px;
+  }
+
+  .commit-diff-header__actions {
+    grid-column: 1;
+    grid-row: auto;
+    justify-self: start;
+  }
+
+  .commit-diff-header__identity {
+    grid-template-columns: 46px minmax(0, 1fr);
+    gap: 8px 12px;
+  }
+
+  .commit-diff-brand-mark {
+    width: 44px;
+    height: 44px;
+  }
+
+  .commit-diff-header__meta.commit-diff-header__meta--designed {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 8px 14px;
+    overflow: visible;
+  }
+
+  .commit-diff-header-controls {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 860px) {
+  .commit-diff-body--focus {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .commit-diff-body--focus .commit-diff-sidebar {
+    display: none;
+  }
+
+  .commit-diff-body--focus-sidebar-visible .commit-diff-sidebar {
+    display: flex;
+  }
+
+  .commit-diff-sidebar-handle {
+    position: relative;
+    left: auto;
+    top: auto;
+    width: 84px;
+    height: 20px;
+    margin: 6px auto;
+    transform: none;
+  }
+
+  .commit-diff-sidebar-handle__bar {
+    width: 36px;
+    height: 4px;
+  }
+
+  .commit-diff-header-controls {
+    align-items: center;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+}

@@ -1,0 +1,342 @@
+/* Working Changes owns this complete cell anatomy and its local-width contract. */
+
+.working-changes-file-list {
+  container: working-changes-file-list / inline-size;
+}
+
+.working-changes-body > .commit-diff-sidebar {
+  container: working-changes-sidebar / inline-size;
+}
+
+.working-changes-file-cell {
+  --working-changes-selection-rail-width: 40px;
+
+  container: working-changes-file-cell / inline-size;
+  width: 100%;
+  min-width: 0;
+  min-height: 66px;
+  box-sizing: border-box;
+  display: grid;
+  align-items: center;
+  column-gap: 10px;
+  padding: 11px 12px;
+  border: 0;
+  border-radius: 13px;
+  background: var(--bg-card);
+  box-shadow: var(--app-file-card-shadow);
+  overflow: visible;
+  transform: translateY(0);
+  transition:
+    background-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.working-changes-file-cell--has-actions {
+  grid-template-columns: var(--working-changes-selection-rail-width) minmax(0, 1fr) max-content;
+}
+
+.working-changes-file-cell--no-actions {
+  grid-template-columns: var(--working-changes-selection-rail-width) minmax(0, 1fr);
+}
+
+.working-changes-file-cell:hover,
+.working-changes-file-cell:has(.working-changes-file-cell__preview:focus-visible) {
+  background: var(--bg-card);
+  box-shadow: var(--app-file-card-hover-shadow);
+  transform: translateY(-1px);
+}
+
+.working-changes-file-cell--selected,
+.working-changes-file-cell--selected:hover,
+.working-changes-file-cell--selected:has(.working-changes-file-cell__preview:focus-visible) {
+  background: color-mix(in srgb, var(--accent-blue) 5%, var(--bg-card) 95%);
+}
+
+.working-changes-file-cell__selection {
+  width: var(--working-changes-selection-rail-width);
+  min-width: var(--working-changes-selection-rail-width);
+  display: grid;
+  grid-column: 1;
+  place-items: center;
+  justify-self: start;
+  align-self: stretch;
+}
+
+.working-changes-file-cell__selection .working-changes-checkbox {
+  width: 100%;
+  height: 100%;
+  min-height: 44px;
+  box-sizing: border-box;
+  display: grid;
+  place-items: center;
+  gap: 0;
+  border-radius: 9px;
+  background: transparent;
+  transition: background-color var(--transition-fast);
+}
+
+.working-changes-file-cell__selection .working-changes-checkbox:hover,
+.working-changes-file-cell__selection .working-changes-checkbox:has(input:checked) {
+  background: color-mix(in srgb, var(--accent-blue) 9%, transparent);
+}
+
+.working-changes-file-cell__selection .working-changes-checkbox:has(input:focus-visible) {
+  outline: 2px solid color-mix(in srgb, var(--accent-blue) 42%, transparent);
+  outline-offset: 2px;
+}
+
+.working-changes-file-cell__preview {
+  width: 100%;
+  min-width: 0;
+  min-height: 42px;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) max-content max-content;
+  align-items: center;
+  column-gap: 10px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  outline: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--text-secondary);
+  text-align: left;
+  cursor: pointer;
+  grid-column: 2;
+}
+
+.working-changes-file-cell__preview:hover,
+.working-changes-file-cell__preview[aria-pressed='true'] {
+  background: transparent;
+  box-shadow: none;
+}
+
+.working-changes-file-cell__preview:focus-visible {
+  border-radius: 8px;
+  outline: 2px solid var(--accent-blue);
+  outline-offset: 4px;
+}
+
+.working-changes-file-cell .commit-diff-file-glyph {
+  width: 34px;
+  height: 34px;
+  grid-column: 1;
+  border-radius: 9px;
+  border-color: color-mix(in srgb, var(--border-subtle) 90%, var(--text-tertiary) 10%);
+  background: transparent;
+  color: var(--text-secondary);
+  box-shadow: none;
+}
+
+.working-changes-file-cell__identity {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  grid-column: 2;
+}
+
+.working-changes-file-cell__filename,
+.working-changes-file-cell__path {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.working-changes-file-cell__filename {
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.working-changes-file-cell__path {
+  color: var(--text-tertiary);
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.working-changes-file-cell__status {
+  min-width: max-content;
+  display: inline-grid;
+  grid-column: 3;
+  justify-self: end;
+}
+
+.working-changes-file-cell .commit-diff-file-item__badge {
+  min-width: 27px;
+  height: 23px;
+  border-radius: 8px;
+  border-color: color-mix(in srgb, var(--border-subtle) 90%, var(--text-tertiary) 10%);
+  background: transparent;
+}
+
+.working-changes-file-cell__details {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 5px 7px;
+  grid-column: 4;
+}
+
+.working-changes-file-cell__details .commit-diff-file-item__stats {
+  min-width: max-content;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+}
+
+.working-changes-file-cell__details .commit-diff-file-item__stats > *,
+.working-changes-file-cell__meta {
+  white-space: nowrap;
+}
+
+.working-changes-file-cell__meta {
+  color: var(--status-warning);
+  font-size: 9px;
+}
+
+.working-changes-file-cell__actions {
+  min-width: 0;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  grid-column: 3;
+  justify-self: end;
+  align-self: center;
+}
+
+.working-changes-file-stage-action {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--border-default);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--bg-input) 72%, transparent);
+  color: var(--text-tertiary);
+  cursor: pointer;
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.working-changes-file-stage-action .icon {
+  width: 14px;
+  height: 14px;
+}
+
+.working-changes-file-stage-action--stage:not(:disabled) {
+  color: var(--status-success);
+}
+
+.working-changes-file-stage-action--unstage:not(:disabled) {
+  color: var(--status-warning);
+}
+
+.working-changes-file-stage-action--minus:not(:disabled) {
+  color: var(--status-warning);
+}
+
+.working-changes-file-stage-action--discard:not(:disabled) {
+  color: var(--status-error);
+}
+
+.working-changes-file-stage-action:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: currentColor;
+  background: color-mix(in srgb, currentColor 10%, var(--bg-input));
+}
+
+.working-changes-file-stage-action:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.working-changes-file-stage-action:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--accent-blue) 42%, transparent);
+  outline-offset: 2px;
+}
+
+.working-changes-file-stage-action:disabled {
+  cursor: not-allowed;
+  opacity: 0.26;
+}
+
+/* Compact: identity, status, and action stay associated on row one. */
+@container working-changes-file-cell (max-width: 25rem) {
+  .working-changes-file-cell__preview {
+    grid-template-columns: minmax(0, 1fr) max-content;
+    grid-template-rows: minmax(23px, auto) auto;
+    align-items: center;
+    column-gap: 10px;
+    row-gap: 4px;
+  }
+
+  .working-changes-file-cell .commit-diff-file-glyph {
+    display: none;
+  }
+
+  .working-changes-file-cell__identity {
+    overflow: hidden;
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .working-changes-file-cell__status {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    align-self: center;
+  }
+
+  .working-changes-file-cell__details {
+    grid-column: 1 / 3;
+    grid-row: 2;
+    justify-self: start;
+    justify-content: flex-start;
+  }
+
+  .working-changes-file-cell__actions {
+    align-self: start;
+  }
+}
+
+@container working-changes-file-list (max-width: 22rem) {
+  .working-changes-group__heading small {
+    display: none;
+  }
+
+  .working-changes-group__header {
+    min-height: 40px;
+  }
+}
+
+/* 17rem is the 320px desktop pane minus its 24px inline padding on each side. */
+@container working-changes-sidebar (width < 17rem) {
+  .working-changes-file-cell {
+    column-gap: 6px;
+    padding-inline: 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .working-changes-file-cell,
+  .working-changes-file-cell__selection .working-changes-checkbox,
+  .working-changes-file-stage-action {
+    transition-duration: 1ms !important;
+  }
+
+  .working-changes-file-cell:hover,
+  .working-changes-file-stage-action:hover:not(:disabled) {
+    transform: none;
+  }
+}

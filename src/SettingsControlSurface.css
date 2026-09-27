@@ -1,0 +1,31 @@
+/*
+ * Settings sections use fill and existing elevation/focus states to separate
+ * right-side controls. Section cards, row dividers, and opened menus remain
+ * component-owned because they convey layout or interaction boundaries.
+ */
+body:has(#root) .settings :is(
+  .interval-control__main,
+  .interval-control__units,
+  .concurrency-control,
+  .theme-switcher,
+  .mode-btn-group,
+  .toggle,
+  .github-settings-account,
+  .github-settings-account__avatar,
+  .github-settings-account__btn,
+  .github-settings-login-btn,
+  .open-app-picker__value,
+  .open-app-picker__btn,
+  .settings__action-btn,
+  .settings__input,
+  .ai-config-badge,
+  .ai-settings-input,
+  .ai-key-status,
+  .ai-model-select .custom-select__trigger,
+  .ai-primary-button,
+  .ai-secondary-button,
+  .ai-danger-button
+) {
+  border: 0 !important;
+  border-color: transparent !important;
+}

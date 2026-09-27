@@ -1,0 +1,65 @@
+/*
+ * Canonical square-checkbox visual authority.
+ *
+ * Every square checkbox in the app renders through CanonicalCheckbox.jsx so
+ * the box geometry, radius, checked fill, focus ring and disabled treatment
+ * cannot drift between surfaces. Switch/toggle controls are explicitly not
+ * part of this authority.
+ */
+
+.canonical-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  color: var(--text-secondary);
+  cursor: pointer;
+  user-select: none;
+}
+
+.canonical-checkbox input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.canonical-checkbox__box {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--border-hover);
+  border-radius: 5px;
+  background: var(--bg-input);
+  color: transparent;
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.canonical-checkbox__box svg {
+  width: 11px;
+  height: 11px;
+}
+
+.canonical-checkbox input:checked + .canonical-checkbox__box {
+  border-color: var(--accent-blue);
+  background: var(--accent-blue);
+  color: #fff;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-blue) 15%, transparent);
+}
+
+.canonical-checkbox input:focus-visible + .canonical-checkbox__box {
+  outline: 2px solid color-mix(in srgb, var(--accent-blue) 30%, transparent);
+  outline-offset: 2px;
+}
+
+.canonical-checkbox--disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
+}

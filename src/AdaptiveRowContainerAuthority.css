@@ -1,0 +1,71 @@
+/*
+ * Adaptive row / local-container responsive authority.
+ *
+ * Dense rows react to the width of the pane or card that owns them, not to
+ * the application viewport. Whole-surface composition may still use @media.
+ *
+ * Information priority:
+ *   1. identity (file / branch name)
+ *   2. primary state
+ *   3. context actions
+ *   4. diff / secondary metadata
+ *
+ * Compact does not mean tall. Each surface keeps identity and its primary
+ * action associated while secondary information moves to a later band.
+ */
+
+/* Local responsive boundaries. */
+.commit-diff-file-card {
+  container: adaptive-file-card / inline-size;
+}
+
+/*
+ * Commit Diff file cards.
+ * At a narrow card width, identity owns row one and state/stats own row two.
+ * This is intentionally a two-band row rather than a vertically expanded card.
+ */
+@container adaptive-file-card (max-width: 20rem) {
+  body:has(#root) .commit-diff-file-card__content {
+    grid-template-columns: 34px minmax(0, 1fr) !important;
+    grid-template-rows: auto auto;
+    align-items: center;
+    column-gap: 10px;
+    row-gap: 5px;
+  }
+
+  body:has(#root) .commit-diff-file-card__content > .commit-diff-file-glyph {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+    align-self: center;
+  }
+
+  body:has(#root) .commit-diff-file-card__content > .commit-diff-file-item__main {
+    grid-column: 2;
+    grid-row: 1;
+    min-width: 0;
+  }
+
+  body:has(#root) .commit-diff-file-card__content > .commit-diff-file-item__side {
+    grid-column: 2;
+    grid-row: 2;
+    min-width: 0 !important;
+    max-width: 100%;
+    justify-self: start !important;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px 8px;
+  }
+
+  body:has(#root) .commit-diff-file-card__content > .commit-diff-file-item__side .commit-diff-file-item__stats {
+    min-width: 0;
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  body:has(#root) .commit-diff-file-card__content > .commit-diff-file-item__side .commit-diff-file-item__stats > * {
+    white-space: nowrap;
+  }
+}

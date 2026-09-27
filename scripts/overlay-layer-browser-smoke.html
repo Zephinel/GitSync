@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Overlay layer browser smoke</title>
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: system-ui, sans-serif;
+        background: #eef1f7;
+      }
+
+      #overlay-smoke-root {
+        padding: 24px;
+      }
+
+      .overlay-smoke-panel {
+        max-width: 560px;
+        padding: 20px;
+        border-radius: 16px;
+        background: white;
+      }
+
+      .overlay-smoke-controls {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 16px;
+      }
+
+      .overlay-smoke-controls button {
+        padding: 8px 12px;
+      }
+
+      .overlay-smoke-button {
+        position: fixed;
+        left: 50%;
+        top: 50%;
+        width: 240px;
+        height: 80px;
+        transform: translate(-50%, -50%);
+        border: 0;
+        border-radius: 14px;
+        color: white;
+        font: inherit;
+        font-weight: 700;
+      }
+
+      .overlay-smoke-button--workspace {
+        background: #667085;
+      }
+
+      .overlay-smoke-button--dialog,
+      .overlay-smoke-button--dialog-a {
+        background: #356df3;
+      }
+
+      .overlay-smoke-button--dialog-b {
+        background: #7c3aed;
+      }
+
+      .overlay-smoke-button--dialog-c {
+        background: #0f766e;
+      }
+
+      .overlay-smoke-button--nested {
+        background: #e5484d;
+      }
+
+      .app-overlay-slot[data-overlay-presence='exiting'] .overlay-smoke-button {
+        animation: overlay-smoke-exit 900ms cubic-bezier(0.4, 0, 1, 1) both;
+      }
+
+      @keyframes overlay-smoke-exit {
+        from {
+          opacity: 1;
+          transform: translate(-50%, -50%) scale(1);
+        }
+
+        to {
+          opacity: 0;
+          transform: translate(-50%, -50%) scale(0.94);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="overlay-smoke-root"></div>
+    <div class="app-overlay-root">
+      <div
+        id="app-overlay-workspace"
+        class="app-overlay-lane"
+        data-overlay-level="workspace"
+      ></div>
+      <div
+        id="app-overlay-dialog"
+        class="app-overlay-lane"
+        data-overlay-level="dialog"
+      ></div>
+      <div
+        id="app-overlay-nested"
+        class="app-overlay-lane"
+        data-overlay-level="nested"
+      ></div>
+    </div>
+    <script type="module" src="./overlay-layer-browser-smoke.jsx"></script>
+  </body>
+</html>

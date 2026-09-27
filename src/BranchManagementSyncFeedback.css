@@ -1,0 +1,27 @@
+/* Immediate, scoped feedback for complete-view branch sync operations. */
+
+.branch-management-row__actions button[aria-label^="同步分支 "]:disabled {
+  opacity: 1 !important;
+  cursor: progress !important;
+  color: var(--accent-blue) !important;
+  background: color-mix(in srgb, var(--accent-blue) 14%, transparent) !important;
+}
+
+.branch-management-row__actions button[aria-label^="同步分支 "]:disabled > svg {
+  display: block;
+  transform-origin: center;
+  will-change: transform;
+  animation: branchManagementSyncRotate 720ms linear infinite;
+}
+
+@keyframes branchManagementSyncRotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .branch-management-row__actions button[aria-label^="同步分支 "]:disabled > svg {
+    animation: none;
+  }
+}

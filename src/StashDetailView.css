@@ -1,0 +1,298 @@
+.stash-detail-view {
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto auto auto minmax(0, 1fr) auto;
+}
+
+.stash-detail-header {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.stash-detail-header > div {
+  min-width: 0;
+}
+
+.stash-detail-header span {
+  color: var(--text-tertiary);
+  font-size: 9px;
+}
+
+.stash-detail-header h3 {
+  margin: 2px 0 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-primary);
+  font-size: 14px;
+}
+
+.stash-detail-header button,
+.stash-detail-actions button,
+.stash-detail-state button {
+  min-height: 31px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--app-action-surface-background);
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.stash-detail-header button:disabled,
+.stash-detail-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.stash-detail-meta,
+.stash-detail-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  padding: 9px 16px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.stash-detail-meta span,
+.stash-detail-stats span {
+  padding: 5px 7px;
+  border-radius: 7px;
+  background: var(--bg-input);
+  color: var(--text-secondary);
+  font-size: 9px;
+}
+
+.stash-detail-stats--add {
+  color: var(--status-success) !important;
+}
+
+.stash-detail-stats--delete {
+  color: var(--status-error) !important;
+}
+
+.stash-detail-layout {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(260px, 34%) minmax(0, 1fr);
+}
+
+.stash-detail-layout > aside {
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 8px;
+  padding: 10px;
+  border-right: 1px solid var(--border-subtle);
+}
+
+.stash-detail-layout input {
+  width: 100%;
+  min-height: 34px;
+  padding: 0 10px;
+  border: 1px solid var(--border-default);
+  border-radius: 9px;
+  outline: none;
+  background: var(--bg-input);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 10px;
+}
+
+.stash-detail-layout input:focus {
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-blue) 12%, transparent);
+}
+
+.stash-detail-files {
+  min-height: 0;
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  overflow: auto;
+}
+
+.stash-detail-file-group {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.stash-detail-file-group > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 2px 5px;
+  color: var(--text-tertiary);
+  font-size: 8px;
+  letter-spacing: 0.02em;
+}
+
+.stash-detail-file-group > header span {
+  min-width: 20px;
+  padding: 2px 5px;
+  border-radius: 999px;
+  background: var(--bg-input);
+  text-align: center;
+}
+
+.stash-detail-file-group > button {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 7px;
+  padding: 8px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--text-secondary);
+  text-align: left;
+  cursor: pointer;
+  content-visibility: auto;
+  contain: layout paint style;
+  contain-intrinsic-size: 44px;
+}
+
+.stash-detail-file-group > button:hover,
+.stash-detail-file--selected {
+  background: color-mix(in srgb, var(--accent-blue) 7%, var(--bg-input)) !important;
+}
+
+.stash-detail-file-group > button:focus-visible {
+  outline: 0;
+  background: color-mix(in srgb, var(--accent-blue) 7%, var(--bg-input)) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-blue) 24%, transparent);
+}
+
+.stash-detail-files__empty {
+  padding: 24px 10px;
+  color: var(--text-tertiary);
+  font-size: 9px;
+  text-align: center;
+}
+
+.stash-detail-file__status {
+  min-width: 34px;
+  padding: 3px 5px;
+  border-radius: 6px;
+  background: var(--bg-input);
+  color: var(--text-tertiary);
+  font-size: 8px;
+  text-align: center;
+}
+
+.stash-detail-file__status--added,
+.stash-detail-file__status--untracked {
+  color: var(--status-success);
+}
+
+.stash-detail-file__status--deleted,
+.stash-detail-file__status--conflicted {
+  color: var(--status-error);
+}
+
+.stash-detail-file__status--renamed,
+.stash-detail-file__status--copied {
+  color: var(--status-warning);
+}
+
+.stash-detail-file__identity {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.stash-detail-file__identity strong,
+.stash-detail-file__identity small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stash-detail-file__identity strong {
+  color: var(--text-primary);
+  font-size: 9px;
+}
+
+.stash-detail-file__identity small,
+.stash-detail-file__stat {
+  color: var(--text-tertiary);
+  font-size: 8px;
+}
+
+.stash-detail-diff {
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  background: color-mix(in srgb, var(--bg-input) 48%, transparent);
+}
+
+.stash-detail-diff pre {
+  min-width: max-content;
+  margin: 0;
+  padding: 14px;
+  color: var(--text-primary);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 10px;
+  line-height: 1.55;
+  tab-size: 2;
+}
+
+.stash-detail-state,
+.stash-detail-binary {
+  min-height: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 18px;
+  color: var(--text-tertiary);
+  font-size: 10px;
+  text-align: center;
+}
+
+.stash-detail-state--error {
+  color: var(--status-error);
+}
+
+.stash-detail-warning {
+  margin: 8px 16px;
+  padding: 8px 10px;
+  border: 1px solid color-mix(in srgb, var(--status-warning) 30%, var(--border-default));
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--status-warning) 7%, var(--bg-input));
+  color: var(--status-warning);
+  font-size: 9px;
+}
+
+.stash-detail-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 11px 16px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.stash-detail-actions__danger {
+  color: var(--status-error) !important;
+}
+
+@media (max-width: 760px) {
+  .stash-detail-layout {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(180px, 42%) minmax(0, 1fr);
+  }
+
+  .stash-detail-layout > aside {
+    border-right: 0;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+}

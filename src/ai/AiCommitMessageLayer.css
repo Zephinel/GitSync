@@ -1,0 +1,303 @@
+.working-changes-dialog--ai-commit {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.ai-commit-message-mount {
+  margin-top: 18px;
+}
+
+.ai-commit-control {
+  display: grid;
+  gap: 10px;
+}
+
+.ai-commit-control__bar {
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.ai-commit-control__copy {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.ai-commit-control__copy strong {
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.ai-commit-control__copy span {
+  overflow: hidden;
+  color: var(--text-tertiary);
+  font-size: 10px;
+  line-height: 1.4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ai-commit-control__actions {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ai-commit-button {
+  width: 96px;
+  min-width: 96px;
+  max-width: 96px;
+  height: 32px;
+  padding: 0 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  overflow: hidden;
+  border: 0;
+  border-radius: 9px;
+  background: var(--app-action-surface-background);
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 650;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background var(--transition-fast), box-shadow var(--transition-fast), color var(--transition-fast);
+}
+
+.ai-commit-button--primary {
+  background: color-mix(in srgb, var(--accent-blue) 10%, transparent);
+  color: var(--accent-blue);
+}
+
+.ai-commit-button--primary:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--accent-blue) 16%, transparent);
+}
+
+.ai-commit-button--danger {
+  background: var(--status-error-bg);
+  color: var(--status-error);
+}
+
+.ai-commit-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
+}
+
+.ai-commit-overwrite {
+  padding: 9px 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid color-mix(in srgb, var(--status-warning) 38%, var(--border-default));
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--status-warning-bg) 68%, transparent);
+  color: var(--status-warning);
+  font-size: 10px;
+}
+
+.ai-commit-overwrite > span {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.ai-commit-overwrite button {
+  flex: 0 0 auto;
+  height: 26px;
+  padding: 0 9px;
+  border: 0;
+  border-radius: 7px;
+  background: var(--app-action-surface-background);
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 9px;
+  cursor: pointer;
+}
+
+.ai-commit-overwrite .ai-commit-overwrite__confirm {
+  background: color-mix(in srgb, var(--status-warning) 10%, var(--bg-card));
+  color: var(--status-warning);
+}
+
+.ai-commit-status {
+  width: 100%;
+  padding: 9px 12px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--accent-blue) 36%, var(--border-default));
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--accent-blue) 7%, var(--bg-input));
+  box-sizing: border-box;
+}
+
+.ai-commit-status > div {
+  min-width: 0;
+  display: grid;
+  gap: 0;
+}
+
+.ai-commit-status strong,
+.ai-commit-status span {
+  overflow: hidden;
+  line-height: 1.45;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ai-commit-status strong {
+  color: var(--text-primary);
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.ai-commit-status > div > span {
+  max-height: 1.45em;
+  margin-top: 3px;
+  color: var(--text-secondary);
+  font-size: 9px;
+  animation: aiCommitStatusDetailReveal 220ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.ai-commit-status--completed {
+  border-color: color-mix(in srgb, var(--status-success) 36%, var(--border-default));
+  background: color-mix(in srgb, var(--status-success-bg) 62%, var(--bg-input));
+}
+
+.ai-commit-status--failed {
+  border-color: color-mix(in srgb, var(--status-error) 42%, var(--border-default));
+  background: color-mix(in srgb, var(--status-error-bg) 66%, var(--bg-input));
+}
+
+.ai-commit-status--cancelled {
+  border-color: var(--border-default);
+  background: var(--bg-input);
+}
+
+.ai-commit-status__dot {
+  width: 8px;
+  height: 8px;
+  margin-top: 4px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: currentColor;
+  color: var(--status-success);
+}
+
+.ai-commit-status--failed .ai-commit-status__dot {
+  color: var(--status-error);
+}
+
+.ai-commit-status--cancelled .ai-commit-status__dot {
+  color: var(--text-tertiary);
+}
+
+.ai-commit-spinner {
+  width: 13px;
+  height: 13px;
+  margin-top: 1px;
+  flex: 0 0 auto;
+  border: 2px solid color-mix(in srgb, var(--accent-blue) 24%, transparent);
+  border-top-color: var(--accent-blue);
+  border-radius: 50%;
+  animation: aiCommitSpin 720ms linear infinite;
+}
+
+.ai-commit-button .ai-commit-spinner {
+  margin-top: 0;
+}
+
+.ai-commit-coverage {
+  color: var(--text-secondary);
+  font-size: 9px;
+}
+
+.ai-commit-coverage summary {
+  width: max-content;
+  cursor: pointer;
+  color: var(--accent-blue);
+}
+
+.ai-commit-coverage ul {
+  max-height: 110px;
+  margin: 7px 0 0;
+  padding: 8px 10px;
+  overflow: auto;
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  background: var(--bg-input);
+  list-style: none;
+}
+
+.ai-commit-coverage li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  line-height: 1.7;
+}
+
+.ai-commit-coverage code {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text-primary);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ai-commit-coverage li span {
+  flex: 0 0 auto;
+  color: var(--text-tertiary);
+}
+
+.working-changes-dialog .ai-commit-message-mount + textarea {
+  margin-top: 10px;
+}
+
+@keyframes aiCommitSpin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes aiCommitStatusDetailReveal {
+  from {
+    max-height: 0;
+    margin-top: 0;
+    opacity: 0;
+    transform: translateY(-3px);
+  }
+
+  to {
+    max-height: 1.45em;
+    margin-top: 3px;
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 620px) {
+  .ai-commit-control__bar,
+  .ai-commit-overwrite {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .ai-commit-control__actions,
+  .ai-commit-button {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ai-commit-spinner,
+  .ai-commit-status > div > span {
+    animation: none;
+  }
+}

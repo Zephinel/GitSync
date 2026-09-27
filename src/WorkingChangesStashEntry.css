@@ -1,0 +1,61 @@
+.working-changes-stash-split {
+  position: relative;
+  order: 11;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.working-changes-stash-split[hidden] {
+  display: none !important;
+}
+
+.working-changes-stash-split__main {
+  order: initial !important;
+  min-width: 132px;
+  gap: 7px;
+  border-radius: 10px !important;
+}
+
+.working-changes-stash-manage {
+  order: initial !important;
+  min-width: 132px;
+  gap: 7px;
+  border-radius: 10px !important;
+}
+
+.working-changes-stash-split__icon {
+  display: inline-grid;
+  place-items: center;
+}
+
+.working-changes-stash-split__menu {
+  width: 32px;
+  min-width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 10px;
+  background: var(--app-action-surface-background);
+  color: var(--text-secondary);
+  box-shadow: var(--app-action-surface-shadow);
+  cursor: pointer;
+}
+
+.working-changes-stash-split__menu:hover:not(:disabled),
+.working-changes-stash-split__menu[aria-expanded="true"] {
+  background: color-mix(in srgb, var(--accent-blue) 9%, var(--bg-card));
+  color: var(--accent-blue);
+  box-shadow: var(--app-action-surface-hover-shadow);
+}
+
+.working-changes-stash-split__menu:disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
+}
+
+.working-changes-stash-split__menu svg {
+  width: 15px;
+  height: 15px;
+}

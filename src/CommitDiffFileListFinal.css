@@ -1,0 +1,2 @@
+/* Keep the shared list contract last in the application stylesheet order. */
+@import './CommitDiffFileListShared.css';

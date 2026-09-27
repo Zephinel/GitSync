@@ -1,0 +1,77 @@
+.stash-manager-table-scroll {
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  border: 1px solid var(--border-subtle);
+  border-radius: 11px;
+  background: var(--bg-card);
+}
+
+.stash-manager-table {
+  min-width: 700px;
+  display: grid;
+  align-content: start;
+}
+
+.stash-manager-table__header,
+.stash-manager-table-row {
+  display: grid;
+  grid-template-columns: minmax(230px, 1fr) 145px 118px 74px 42px;
+  align-items: center;
+}
+
+.stash-manager-table__header {
+  min-height: 37px;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding: 0 8px 0 12px;
+  border-bottom: 1px solid var(--border-subtle);
+  background: color-mix(in srgb, var(--bg-input) 94%, var(--bg-card));
+  color: var(--text-tertiary);
+  font-size: 8px;
+  font-weight: 750;
+}
+
+.stash-manager-table-row {
+  min-height: 58px;
+  padding: 0 8px 0 12px;
+  border-bottom: 1px solid var(--border-subtle);
+  content-visibility: auto;
+  contain: layout paint style;
+  contain-intrinsic-size: 58px;
+}
+.stash-manager-table-row:last-child { border-bottom: 0; }
+.stash-manager-table-row:hover { background: var(--bg-card-hover); }
+
+.stash-manager-table-row__main {
+  grid-column: 1 / 5;
+  min-width: 0;
+  min-height: 57px;
+  display: grid;
+  grid-template-columns: minmax(230px, 1fr) 145px 118px 74px;
+  align-items: center;
+  gap: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 9px;
+  text-align: left;
+  cursor: pointer;
+}
+.stash-manager-table-row__main:focus-visible { outline: 2px solid color-mix(in srgb, var(--accent-blue) 35%, transparent); outline-offset: -2px; border-radius: 7px; }
+.stash-manager-table-row__main > span { min-width: 0; padding-right: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.stash-manager-table-row__description { display: grid; gap: 4px; }
+.stash-manager-table-row__description strong { overflow: hidden; color: var(--text-primary); font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+.stash-manager-table-row__description small { overflow: hidden; color: var(--text-tertiary); font-size: 8px; text-overflow: ellipsis; white-space: nowrap; }
+.stash-manager-table-row > .stash-entry-action-menu { grid-column: 5; justify-self: end; }
+
+.stash-manager-table__empty {
+  min-height: 180px;
+  display: grid;
+  place-items: center;
+  color: var(--text-tertiary);
+  font-size: 10px;
+}

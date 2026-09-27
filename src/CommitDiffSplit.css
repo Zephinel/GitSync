@@ -1,0 +1,150 @@
+.commit-diff-view-switcher {
+  flex: 0 0 auto;
+  height: 32px;
+  padding: 3px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--bg-elevated);
+  box-shadow: none;
+}
+
+.commit-diff-view-switcher .layout-switcher__btn {
+  width: 28px;
+  height: 24px;
+  border-radius: 999px;
+}
+
+.commit-diff-view-switcher .layout-switcher__btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.48;
+}
+
+.commit-diff-split {
+  --commit-diff-split-min-width: 900px;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  margin: 16px 24px 24px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  background: var(--bg-card);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.52;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset;
+}
+
+.commit-diff-split__row {
+  display: grid;
+  grid-template-columns: 54px minmax(320px, 1fr) 54px minmax(320px, 1fr);
+  min-width: var(--commit-diff-split-min-width, 900px);
+  align-items: stretch;
+  border-bottom: 1px solid var(--border-subtle);
+  border-bottom: 1px solid color-mix(in srgb, var(--border-subtle) 72%, transparent);
+}
+
+.commit-diff-split__line {
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr);
+  min-width: var(--commit-diff-split-min-width, 900px);
+  border-bottom: 1px solid var(--border-subtle);
+  border-bottom: 1px solid color-mix(in srgb, var(--border-subtle) 72%, transparent);
+}
+
+.commit-diff-split__row:last-child,
+.commit-diff-split__line:last-child {
+  border-bottom: 0;
+}
+
+.commit-diff-split__num {
+  user-select: none;
+  padding: 0 9px;
+  text-align: right;
+  color: var(--text-tertiary);
+  background: var(--bg-elevated);
+  background: color-mix(in srgb, var(--bg-elevated) 80%, transparent);
+  border-right: 1px solid var(--border-subtle);
+  font-variant-numeric: tabular-nums;
+}
+
+.commit-diff-split__code {
+  min-width: 0;
+  padding: 0 12px;
+  color: var(--text-primary);
+  white-space: pre;
+  tab-size: 2;
+  border-right: 1px solid var(--border-subtle);
+  border-right: 1px solid color-mix(in srgb, var(--border-subtle) 54%, transparent);
+}
+
+.commit-diff-split__row .commit-diff-split__code:last-child {
+  border-right: 0;
+}
+
+.commit-diff-split--wrap .commit-diff-split__row,
+.commit-diff-split--wrap .commit-diff-split__line {
+  min-width: 0;
+}
+
+.commit-diff-split--wrap .commit-diff-split__code {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.commit-diff-split__line--hunk {
+  background: var(--bg-elevated);
+  background: color-mix(in srgb, var(--accent-blue) 16%, var(--bg-elevated) 84%);
+}
+
+.commit-diff-split__line--hunk .commit-diff-split__code,
+.commit-diff-split__line--hunk .commit-diff-split__num {
+  color: var(--accent-blue);
+  font-weight: 800;
+}
+
+.commit-diff-split__line--note .commit-diff-split__code {
+  color: var(--status-warning);
+  font-style: italic;
+}
+
+.commit-diff-split__code--del,
+.commit-diff-split__num--del {
+  color: var(--status-error);
+  background: var(--status-error-bg);
+  color: color-mix(in srgb, var(--status-error) 86%, var(--text-primary) 14%);
+  background: color-mix(in srgb, var(--status-error-bg) 78%, transparent);
+}
+
+.commit-diff-split__code--add,
+.commit-diff-split__num--add {
+  color: var(--status-success);
+  background: var(--status-success-bg);
+  color: color-mix(in srgb, var(--status-success) 86%, var(--text-primary) 14%);
+  background: color-mix(in srgb, var(--status-success-bg) 78%, transparent);
+}
+
+.commit-diff-split__code--blank,
+.commit-diff-split__num--blank {
+  background: var(--bg-elevated);
+  background: color-mix(in srgb, var(--bg-elevated) 48%, transparent);
+  color: transparent;
+}
+
+.commit-diff-token {
+  border-radius: 3px;
+  padding: 0 1px;
+}
+
+.commit-diff-token--removed {
+  background: var(--status-error-bg);
+  color: var(--status-error);
+  background: color-mix(in srgb, var(--status-error) 24%, transparent);
+  color: color-mix(in srgb, var(--status-error) 88%, var(--text-primary) 12%);
+}
+
+.commit-diff-token--added {
+  background: var(--status-success-bg);
+  color: var(--status-success);
+  background: color-mix(in srgb, var(--status-success) 24%, transparent);
+  color: color-mix(in srgb, var(--status-success) 88%, var(--text-primary) 12%);
+}

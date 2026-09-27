@@ -1,0 +1,160 @@
+.working-changes-toolbar__selection {
+  order: 5;
+}
+
+.working-changes-action--discard {
+  order: 20;
+}
+
+.working-changes-action--commit {
+  order: 30;
+}
+
+.ai-review-toolbar-button {
+  order: 40;
+}
+
+.working-changes-sheet .commit-diff-meta-item--branch {
+  min-width: 72px;
+  max-width: min(320px, 25vw);
+  flex: 1 1 180px;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.working-changes-sheet .commit-diff-meta-item--files {
+  flex: 0 0 auto;
+}
+
+.working-changes-sheet .commit-diff-meta-item--files::after {
+  content: '未提交改动总行数';
+  margin-left: 10px;
+  color: var(--text-tertiary);
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+/* Keep summary and always-visible actions on one shared baseline. */
+.working-changes-sheet {
+  --working-changes-actions-width: clamp(520px, 45vw, 660px);
+  position: relative;
+  grid-template-rows: auto auto minmax(0, 1fr);
+}
+
+.working-changes-sheet .commit-diff-header--designed {
+  min-height: 104px;
+  padding-bottom: 16px;
+}
+
+.working-changes-sheet .commit-diff-header__meta.commit-diff-header__meta--designed {
+  min-height: 32px;
+  align-items: center;
+  gap: clamp(8px, 0.8vw, 14px);
+}
+
+.working-changes-sheet .commit-diff-header__meta.commit-diff-header__meta--designed {
+  box-sizing: border-box;
+  padding-right: calc(var(--working-changes-actions-width) + 14px);
+}
+
+.working-changes-sheet .working-changes-toolbar {
+  position: absolute;
+  z-index: 4;
+  top: 58px;
+  right: 24px;
+  width: var(--working-changes-actions-width);
+  min-height: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  transform-origin: right center;
+  will-change: transform, opacity;
+}
+
+.working-changes-sheet .working-changes-toolbar__actions {
+  display: contents;
+}
+
+.working-changes-sheet .working-changes-toolbar .working-changes-action {
+  min-width: 88px;
+  max-width: 112px;
+  flex: 1 1 104px;
+  padding-inline: 9px;
+  white-space: nowrap;
+}
+
+.working-changes-sheet .working-changes-toolbar__selection {
+  height: 32px;
+  max-width: 142px;
+  display: flex;
+  align-items: center;
+  flex: 0 1 142px;
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.working-changes-sheet .working-changes-notice {
+  grid-row: 2;
+}
+
+.working-changes-sheet .working-changes-body {
+  grid-row: 3;
+}
+
+/* Focus mode needs the full-width contextual bar because the meta row owns Diff controls. */
+.working-changes-sheet.commit-diff-sheet--focus {
+  grid-template-rows: auto auto auto minmax(0, 1fr);
+}
+
+.working-changes-sheet.commit-diff-sheet--focus .commit-diff-header__meta.commit-diff-header__meta--designed {
+  padding-right: 0;
+}
+
+.working-changes-sheet.commit-diff-sheet--focus .working-changes-toolbar {
+  position: static;
+  width: auto;
+  min-height: 58px;
+  height: auto;
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--border-subtle);
+  background: color-mix(in srgb, var(--bg-input) 58%, transparent);
+}
+
+.working-changes-sheet.commit-diff-sheet--focus .working-changes-notice,
+.working-changes-sheet.commit-diff-sheet--focus .working-changes-body {
+  grid-row: auto;
+}
+
+@media (max-width: 1180px) {
+  .working-changes-sheet {
+    grid-template-rows: auto auto auto minmax(0, 1fr);
+  }
+
+  .working-changes-sheet .commit-diff-header__meta.commit-diff-header__meta--designed {
+    padding-right: 0;
+  }
+
+  .working-changes-sheet .working-changes-toolbar {
+    position: static;
+    width: auto;
+    min-height: 58px;
+    height: auto;
+    padding: 12px 18px;
+    border-bottom: 1px solid var(--border-subtle);
+    background: color-mix(in srgb, var(--bg-input) 58%, transparent);
+  }
+
+  .working-changes-sheet .working-changes-notice,
+  .working-changes-sheet .working-changes-body {
+    grid-row: auto;
+  }
+}

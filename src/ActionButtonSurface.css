@@ -1,0 +1,733 @@
+/*
+ * Canonical surface treatment for visible application buttons.
+ *
+ * Menu items, navigation, segmented controls, toggles and bare inline actions
+ * intentionally keep their own component-specific visual language. Registered
+ * action families use fill and elevation for their normal/hover states; an
+ * inset shadow is never used as a control outline.
+ */
+
+:root,
+[data-theme="dark"] {
+  --app-action-surface-background: color-mix(in srgb, var(--bg-elevated) 86%, var(--bg-card) 14%);
+  --app-action-surface-hover-background: color-mix(in srgb, var(--accent-blue) 10%, var(--bg-elevated) 90%);
+  --app-action-surface-disabled-background: color-mix(in srgb, var(--bg-elevated) 72%, var(--bg-card) 28%);
+  --app-action-surface-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.18),
+    0 2px 6px rgba(0, 0, 0, 0.14);
+  --app-action-surface-hover-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.2),
+    0 4px 10px rgba(0, 0, 0, 0.16);
+  --app-action-surface-pressed-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.16);
+  --app-action-surface-disabled-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  --app-large-surface-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.035);
+  --app-dashboard-card-shadow:
+    0 5px 12px -3px rgba(0, 0, 0, 0.18),
+    0 1px 2px rgba(0, 0, 0, 0.08);
+  --app-dashboard-stat-card-shadow:
+    0 0 12px -3px rgba(0, 0, 0, 0.20),
+    0 0 2px rgba(0, 0, 0, 0.09);
+  --app-dashboard-card-hover-shadow:
+    0 8px 16px -4px rgba(0, 0, 0, 0.22),
+    0 2px 4px rgba(0, 0, 0, 0.1);
+  --app-large-surface-hover-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.13),
+    0 2px 5px rgba(0, 0, 0, 0.07),
+    inset 0 1px 0 rgba(255, 255, 255, 0.045);
+  --app-floating-card-shadow:
+    0 4px 8px -2px rgba(0, 0, 0, 0.14),
+    0 1px 2px rgba(0, 0, 0, 0.08);
+  --app-floating-card-hover-shadow:
+    0 5px 8px -2px rgba(0, 0, 0, 0.18),
+    0 2px 3px rgba(0, 0, 0, 0.10);
+  --app-history-entry-shadow: 0 0 12px rgba(0, 0, 0, 0.24);
+  --app-history-entry-hover-shadow: 0 0 14px rgba(0, 0, 0, 0.29);
+  --app-history-group-background: var(--bg-secondary);
+  --app-file-card-shadow:
+    0 5px 14px rgba(0, 0, 0, 0.11),
+    0 1px 3px rgba(0, 0, 0, 0.075),
+    inset 0 1px 0 rgba(255, 255, 255, 0.035);
+  --app-file-card-hover-shadow:
+    0 6px 18px rgba(0, 0, 0, 0.14),
+    0 2px 4px rgba(0, 0, 0, 0.09),
+    inset 0 1px 0 rgba(255, 255, 255, 0.045);
+  --app-card-highlight-background: var(--bg-card);
+  --app-card-highlight-shadow: var(--app-large-surface-hover-shadow);
+  --app-secondary-surface-shadow:
+    0 14px 42px rgba(0, 0, 0, 0.26),
+    0 2px 7px rgba(0, 0, 0, 0.12);
+  --app-toast-shadow:
+    0 14px 32px rgba(0, 0, 0, 0.28),
+    0 5px 12px rgba(0, 0, 0, 0.16),
+    0 0 14px rgba(0, 0, 0, 0.16);
+}
+
+[data-theme="light"] {
+  --app-action-surface-background: color-mix(in srgb, var(--bg-elevated) 88%, var(--bg-card) 12%);
+  --app-action-surface-hover-background: color-mix(in srgb, var(--accent-blue) 8%, var(--bg-elevated) 92%);
+  --app-action-surface-disabled-background: color-mix(in srgb, var(--bg-elevated) 76%, var(--bg-card) 24%);
+  --app-action-surface-shadow:
+    0 1px 2px rgba(20, 31, 55, 0.08),
+    0 2px 6px rgba(20, 31, 55, 0.06);
+  --app-action-surface-hover-shadow:
+    0 1px 3px rgba(20, 31, 55, 0.1),
+    0 3px 8px rgba(20, 31, 55, 0.08);
+  --app-action-surface-pressed-shadow:
+    0 1px 2px rgba(20, 31, 55, 0.08);
+  --app-action-surface-disabled-shadow: 0 1px 2px rgba(20, 31, 55, 0.05);
+  --app-large-surface-shadow:
+    0 1px 2px rgba(20, 31, 55, 0.045),
+    inset 0 1px 0 rgba(255, 255, 255, 0.58);
+  --app-dashboard-card-shadow:
+    0 5px 12px -3px rgba(20, 31, 55, 0.08),
+    0 1px 2px rgba(20, 31, 55, 0.035);
+  --app-dashboard-stat-card-shadow:
+    0 0 12px -3px rgba(20, 31, 55, 0.10),
+    0 0 2px rgba(20, 31, 55, 0.045);
+  --app-dashboard-card-hover-shadow:
+    0 8px 16px -4px rgba(20, 31, 55, 0.11),
+    0 2px 4px rgba(20, 31, 55, 0.045);
+  --app-large-surface-hover-shadow:
+    0 1px 3px rgba(20, 31, 55, 0.06),
+    0 2px 5px rgba(20, 31, 55, 0.035),
+    inset 0 1px 0 rgba(255, 255, 255, 0.64);
+  --app-floating-card-shadow:
+    0 4px 8px -2px rgba(20, 31, 55, 0.075),
+    0 1px 2px rgba(20, 31, 55, 0.04);
+  --app-floating-card-hover-shadow:
+    0 5px 8px -2px rgba(20, 31, 55, 0.10),
+    0 2px 3px rgba(20, 31, 55, 0.055);
+  --app-history-entry-shadow: 0 0 12px rgba(20, 31, 55, 0.12);
+  --app-history-entry-hover-shadow: 0 0 14px rgba(20, 31, 55, 0.16);
+  --app-history-group-background: var(--bg-card);
+  --app-file-card-shadow:
+    0 5px 14px rgba(20, 31, 55, 0.075),
+    0 1px 3px rgba(20, 31, 55, 0.045),
+    inset 0 1px 0 rgba(255, 255, 255, 0.54);
+  --app-file-card-hover-shadow:
+    0 6px 18px rgba(20, 31, 55, 0.095),
+    0 2px 4px rgba(20, 31, 55, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  --app-card-highlight-background: var(--bg-card);
+  --app-card-highlight-shadow: var(--app-large-surface-hover-shadow);
+  --app-secondary-surface-shadow:
+    0 14px 42px rgba(20, 31, 55, 0.14),
+    0 2px 7px rgba(20, 31, 55, 0.06);
+  --app-toast-shadow:
+    0 14px 32px rgba(20, 31, 55, 0.13),
+    0 5px 12px rgba(20, 31, 55, 0.08),
+    0 0 14px rgba(20, 31, 55, 0.06);
+}
+
+/* Opt in only visible button surfaces. Deliberate exclusions are tested. */
+body:has(#root) :where(
+  .sidebar__sync-all-btn,
+  .sidebar__sync-hover-btn,
+  .dashboard__batch-btn,
+  .dashboard__search-clear,
+  .batch-toggle-btn,
+  .batch-clear-btn,
+  .batch-action-btn,
+  .history-center__clear-btn,
+  .commit-history-toolbar__refresh,
+  .commit-history-drawer__retry,
+  .commit-history-drawer__close,
+  .commit-history-row__icon-btn,
+  .commit-diff-header__icon-btn,
+  .commit-diff-sidebar-handle,
+  .commit-diff-wrap-toggle,
+  .dashboard__add-btn,
+  .add-repo-card__main-trigger,
+  .add-repo-card__quick-btn,
+  .repo-card__branch-row-action,
+  .repo-card__branch-attention-action,
+  .repo-card__working-changes-action,
+  .repo-card__missing-overlay-remove-btn,
+  .action-btn,
+  .empty-state__btn,
+  .github-settings-account__btn,
+  .github-settings-login-btn,
+  .open-app-picker__btn,
+  .settings__action-btn,
+  .github-repo-browser__filter-toggle,
+  .conflict-file__btn,
+  .clone-dialog__pick-btn,
+  .dialog-btn,
+  .undo-toast__btn,
+  .status-toast__btn,
+  .device-auth-dialog__open-btn,
+  .github-repo-browser__close,
+  .github-repo-browser__clone-close,
+  .github-repo-browser__remote-btn,
+  .github-repo-browser__pick-btn,
+  .github-repo-browser__clone-cancel-btn,
+  .commit-diff-action-btn,
+  .commit-diff-close,
+  .commit-diff-viewer-state button,
+  .commit-diff-large-notice button,
+  .image-diff__fit-button,
+  .working-changes-action,
+  .working-changes-staging-refresh,
+  .working-changes-file-stage-action,
+  .working-changes-stash-split__menu,
+  .working-changes-dialog footer button,
+  .working-changes-authority-warning button,
+  .commit-diff-state button,
+  .branch-attention-detail__icon-button,
+  .branch-attention-detail__primary-action,
+  .branch-attention-detail__copy-action,
+  .branch-attention-detail__delete-action,
+  .branch-attention-detail__state button,
+  .branch-attention-detail__footer button,
+  .branch-attention-detail__delete-dialog > footer button,
+  .branch-management-btn:not(.branch-management-create-header),
+  .branch-management-batch-toggle,
+  .branch-management-summary > button,
+  .branch-management-row__actions button,
+  .branch-management-hover-action,
+  .branch-management-icon-action,
+  .branch-management-hover-expand,
+  .branch-management-text-action,
+  .branch-creation-icon-button,
+  .branch-creation-button,
+  .branch-creation-suggestions button,
+  .stash-manager-icon-button,
+  .stash-manager-button,
+  .stash-manager-load-error button,
+  .stash-entry-action-menu__trigger,
+  .stash-manager-pending__actions button,
+  .stash-manager-pending__item button,
+  .stash-manager-pagination button,
+  .stash-manager-item__actions button,
+  .stash-management-popover__refresh,
+  .stash-scope-resolution__details-toggle,
+  .stash-detail-state button,
+  .stash-detail-actions button,
+  .stash-scope-resolution__actions > button,
+  .stash-scope-resolution__confirm button,
+  .ai-commit-button,
+  .ai-commit-overwrite button,
+  .ai-review-toolbar-button,
+  .ai-review-icon-button,
+  .ai-review-button,
+  .ai-review-filters button,
+  .ai-primary-button,
+  .ai-secondary-button,
+  .ai-danger-button,
+  .ai-settings-section .ai-settings-actions > button,
+  .app-bootstrap-error__panel button
+) {
+  --app-action-border: 0;
+  --app-action-outline: 0;
+  --app-action-color: var(--text-secondary);
+  --app-action-hover-color: var(--accent-blue);
+  --app-action-current-background: var(--app-action-state-background, var(--app-action-surface-background));
+  --app-action-current-shadow: var(--app-action-state-shadow, var(--app-action-surface-shadow));
+  --app-action-hover-background: var(--app-action-surface-hover-background);
+  --app-action-hover-shadow: var(--app-action-surface-hover-shadow);
+  --app-action-pressed-shadow: var(--app-action-surface-pressed-shadow);
+  --app-action-focus-shadow:
+    var(--app-action-surface-hover-shadow),
+    0 0 0 3px color-mix(in srgb, var(--accent-blue) 24%, transparent);
+  --app-action-disabled-background: var(--app-action-surface-disabled-background);
+  --app-action-disabled-shadow: var(--app-action-surface-disabled-shadow);
+  --app-action-text-shadow: none;
+  --app-action-transform: none;
+  --app-action-transform-origin: center;
+  --app-action-transition:
+    background-color 150ms ease,
+    color 150ms ease,
+    box-shadow 150ms ease,
+    transform 130ms ease;
+  --app-action-hover-transform: none;
+  --app-action-pressed-transform: scale(0.98);
+  --app-action-disabled-cursor: not-allowed;
+  --app-action-disabled-opacity: 0.58;
+  --app-action-disabled-color: var(--text-tertiary);
+  --app-action-reduced-motion-duration: 1ms;
+  border: var(--app-action-border) !important;
+  outline: var(--app-action-outline);
+  background: var(--app-action-current-background) !important;
+  color: var(--app-action-color) !important;
+  box-shadow: var(--app-action-current-shadow) !important;
+  text-shadow: var(--app-action-text-shadow) !important;
+  transform: var(--app-action-transform);
+  transform-origin: var(--app-action-transform-origin);
+  transition: var(--app-action-transition) !important;
+
+  @media (hover: hover) {
+    &:hover:not(:disabled) {
+      background: var(--app-action-hover-background) !important;
+      color: var(--app-action-hover-color) !important;
+      box-shadow: var(--app-action-hover-shadow) !important;
+      transform: var(--app-action-hover-transform) !important;
+    }
+  }
+
+  &:active:not(:disabled) {
+    box-shadow: var(--app-action-pressed-shadow) !important;
+    transform: var(--app-action-pressed-transform) !important;
+  }
+
+  &:focus-visible {
+    outline: var(--app-action-outline) !important;
+    box-shadow: var(--app-action-focus-shadow) !important;
+  }
+
+  &:disabled {
+    cursor: var(--app-action-disabled-cursor);
+    opacity: var(--app-action-disabled-opacity) !important;
+    background: var(--app-action-disabled-background) !important;
+    color: var(--app-action-disabled-color) !important;
+    box-shadow: var(--app-action-disabled-shadow) !important;
+    transform: var(--app-action-transform) !important;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    & {
+      transition-duration: var(--app-action-reduced-motion-duration) !important;
+    }
+  }
+}
+
+/* Dashboard shell actions use the card surface, which is white in light theme. */
+body:has(#root) :is(
+  .sidebar__sync-all-btn:not(.sidebar__sync-all-btn--syncing),
+  .dashboard__header-actions
+) {
+  --app-action-surface-background: var(--bg-card);
+  --app-action-surface-hover-background: color-mix(in srgb, var(--accent-blue) 8%, var(--bg-card) 92%);
+  --app-action-surface-disabled-background: var(--bg-card);
+}
+
+/* Keep the idle sync-all control aligned with the sidebar statistic cards. */
+body:has(#root) .sidebar__sync-all-btn:not(.sidebar__sync-all-btn--syncing) {
+  --app-action-surface-shadow: var(--app-dashboard-stat-card-shadow);
+}
+
+body:has(#root) .working-changes-file-stage-action {
+  --app-action-disabled-opacity: 0.26;
+}
+
+/* Keep semantic state groups at flat specificity so composed states resolve by order. */
+body:has(#root) :where(
+  .dashboard__add-btn,
+  .empty-state__btn,
+  .batch-action-btn--sync,
+  .open-app-picker__btn:not(.open-app-picker__btn--ghost),
+  .settings__action-btn,
+  .undo-toast__btn--primary,
+  .sidebar__sync-all-btn--syncing,
+  .sidebar__sync-hover-btn--changed,
+  .sidebar__sync-hover-btn--syncing,
+  .commit-history-toolbar__refresh,
+  .commit-history-drawer__retry,
+  .commit-diff-viewer-state button,
+  .commit-diff-large-notice button,
+  .branch-attention-detail__footer button,
+  .ai-review-toolbar-button,
+  .action-btn--sync,
+  .dialog-btn--primary,
+  .device-auth-dialog__open-btn,
+  .github-repo-browser__pick-btn,
+  .github-repo-browser__filter-toggle--active,
+  .repo-card__branch-attention-action,
+  .repo-card__branch-row-action:not(.repo-card__branch-row-delete),
+  .branch-management-row__actions button:not(.branch-management-row__delete),
+  .stash-manager-item__actions button,
+  .stash-manager-pending__item button,
+  .stash-management-popover__refresh,
+  .working-changes-action--commit,
+  .working-changes-action--stash,
+  .working-changes-dialog__primary,
+  .branch-attention-detail__primary-action,
+  .branch-creation-button--primary,
+  .stash-manager-button--primary,
+  .stash-detail-actions__primary,
+  .ai-commit-button--primary,
+  .ai-review-button--primary,
+  .ai-primary-button,
+  .ai-review-filters button[aria-pressed="true"],
+  .app-bootstrap-error__panel button
+) {
+  --app-action-color: var(--accent-blue);
+  --app-action-hover-color: var(--accent-blue);
+}
+
+body:has(#root) :where(
+  .batch-action-btn--danger,
+  .action-btn--danger,
+  .dialog-btn--danger,
+  .repo-card__missing-overlay-remove-btn,
+  .repo-card__branch-row-delete,
+  .working-changes-action--discard,
+  .working-changes-file-stage-action--discard,
+  .branch-attention-detail__delete-action,
+  .branch-attention-detail__delete-confirm,
+  .branch-management-btn--danger,
+  .branch-management-row__delete,
+  .branch-creation-button--danger,
+  .stash-manager-button--danger,
+  .stash-detail-actions__danger,
+  .ai-commit-button--danger,
+  .ai-review-button--danger,
+  .ai-danger-button,
+  .github-repo-browser__clone-cancel-btn,
+  .stash-manager-load-error button,
+  .status-toast--danger .status-toast__btn
+) {
+  --app-action-color: var(--status-error);
+  --app-action-hover-color: var(--status-error);
+  --app-action-hover-background: color-mix(in srgb, var(--status-error) 10%, var(--bg-card));
+}
+
+body:has(#root) :where(
+  .sidebar__sync-hover-btn--failed,
+  .action-btn--error,
+  .action-btn--cancel,
+  .repo-card__working-changes-action,
+  .working-changes-action--unstage,
+  .working-changes-file-stage-action--unstage,
+  .working-changes-file-stage-action--minus,
+  .working-changes-authority-warning:not(.working-changes-authority-warning--info) button,
+  .ai-commit-overwrite__confirm,
+  .stash-manager-pending__actions button:last-child,
+  .status-toast:not(.status-toast--success):not(.status-toast--danger) .status-toast__btn
+) {
+  --app-action-color: var(--status-warning);
+  --app-action-hover-color: var(--status-warning);
+  --app-action-hover-background: color-mix(in srgb, var(--status-warning) 10%, var(--bg-card));
+}
+
+body:has(#root) :where(
+  .working-changes-action--stage,
+  .working-changes-file-stage-action--stage,
+  .status-toast--success .status-toast__btn
+) {
+  --app-action-color: var(--status-success);
+  --app-action-hover-color: var(--status-success);
+  --app-action-hover-background: color-mix(in srgb, var(--status-success) 10%, var(--bg-card));
+}
+
+body:has(#root) :where(
+  .dashboard__batch-btn--active,
+  .action-btn--syncing,
+  .commit-diff-wrap-toggle--active,
+  .branch-management-icon-btn--active,
+  .commit-diff-sidebar-handle--visible,
+  .commit-diff-sidebar-handle--dragging
+),
+body:has(#root) :where(
+  .commit-diff-header__focus,
+  .commit-diff-sidebar-handle--visible,
+  .commit-diff-sidebar-handle--dragging,
+  .stash-entry-action-menu__trigger,
+  .working-changes-stash-split__menu
+)[aria-expanded="true"],
+body:has(#root) :where(
+  .commit-diff-header__focus,
+  .dashboard__batch-btn
+)[aria-pressed="true"] {
+  --app-action-state-background: color-mix(in srgb, var(--accent-blue) 12%, var(--bg-card));
+  --app-action-state-shadow: var(--app-action-surface-hover-shadow);
+  --app-action-color: var(--accent-blue);
+  --app-action-hover-color: var(--accent-blue);
+}
+
+body:has(#root) :where(
+  .sidebar__sync-all-btn--syncing,
+  .sidebar__sync-hover-btn--syncing
+) {
+  --app-action-disabled-color: var(--accent-blue);
+}
+
+body:has(#root) .action-btn--syncing {
+  --app-action-state-shadow:
+    var(--app-action-surface-hover-shadow),
+    0 0 8px color-mix(in srgb, var(--accent-cyan) 16%, transparent);
+}
+
+/* Canceling a sync remains a blue sync action, not a warning state. */
+body:has(#root) .action-btn--sync.action-btn--cancel {
+  --app-action-state-background: color-mix(in srgb, var(--accent-blue) 18%, var(--bg-elevated));
+  --app-action-hover-background: color-mix(in srgb, var(--accent-blue) 22%, var(--bg-elevated));
+  --app-action-color: var(--accent-blue);
+  --app-action-hover-color: var(--accent-blue);
+}
+
+/*
+ * Secondary windows and their content cards use elevation and fill as the
+ * separation cue. Menus, form controls, and timeline markers intentionally
+ * stay component-owned and are not included here. The branch hover popover's
+ * inner rows and tags also retain their dedicated component treatment. Shared
+ * surface registries use :where() so later component-owned authorities can win.
+ */
+body:has(#root) :where(
+  .commit-diff-sheet,
+  .commit-diff-preload-card,
+  .working-changes-dialog,
+  .branch-attention-detail__sheet,
+  .branch-attention-detail__delete-dialog,
+  .branch-management-sheet,
+  .branch-creation-dialog,
+  .create-stash-dialog,
+  .stash-manager-dialog,
+  .stash-manager-confirm,
+  .commit-history-drawer,
+  .github-repo-browser,
+  .github-repo-browser__clone-panel,
+  .app-bootstrap-error__panel,
+  .ai-review-preview,
+  .ai-review-drawer,
+  .conflict-dialog,
+  .error-log-dialog,
+  .delete-dialog,
+  .branch-delete-dialog,
+  .sync-guard-dialog,
+  .import-result-dialog,
+  .clone-dialog,
+  .notice-dialog,
+  .script-log-dialog,
+  .device-auth-dialog,
+  .commit-history-toolbar,
+  .branch-management-confirm,
+  .stash-manager-toast
+) {
+  border: 0 !important;
+  border-color: transparent !important;
+  box-shadow: var(--app-secondary-surface-shadow) !important;
+}
+
+body:has(#root) :where(
+  .stat-item,
+  .commit-diff-file-glyph,
+  .commit-diff-state,
+  .working-changes-dialog__warning,
+  .working-changes-dialog__staging-note,
+  .branch-attention-detail__summary,
+  .branch-attention-detail__row,
+  .branch-attention-detail__feedback,
+  .branch-attention-detail__delete-summary,
+  .branch-management-state,
+  .branch-management-row,
+  .branch-management-notice,
+  .branch-management-operation-overlay,
+  .batch-toolbar,
+  .dashboard__search-empty,
+  .history-stat-card,
+  .history-center__empty,
+  .history-group,
+  .history-entry,
+  .commit-history-remote-divider__label,
+  .conflict-file,
+  .error-log-entry,
+  .delete-dialog__repo,
+  .branch-delete-dialog__branch,
+  .sync-guard-dialog__section,
+  .sync-guard-dialog__item,
+  .import-result-dialog__stat,
+  .import-result-dialog__section,
+  .import-result-dialog__item,
+  .script-log-dialog__session-item,
+  .script-log-dialog__kv,
+  .script-log-dialog__output-wrap,
+  .github-repo-browser__list,
+  .github-repo-browser__clone-list,
+  .github-repo-browser__error,
+  .clone-dialog__error,
+  .import-result-dialog__empty,
+  .create-stash-confirm,
+  .create-stash-error,
+  .create-stash-blocked,
+  .stash-manager-list-section,
+  .stash-manager-create,
+  .stash-manager-pending,
+  .stash-manager-item,
+  .stash-manager-result,
+  .stash-manager-load-error,
+  .stash-manager-empty,
+  .stash-manager-master-list__item,
+  .stash-manager-table-scroll,
+  .stash-detail-layout,
+  .stash-detail-file-group,
+  .stash-detail-state,
+  .stash-detail-binary,
+  .stash-detail-warning,
+  .stash-scope-resolution,
+  .stash-scope-resolution__confirm,
+  .branch-creation-source-facts > div,
+  .ai-review-preview__loading,
+  .ai-review-preview__error,
+  .ai-review-preview__metrics > div,
+  .ai-commit-coverage ul,
+  .ai-review-coverage,
+  .ai-review-request,
+  .ai-review-drawer__error,
+  .ai-review-stale,
+  .ai-review-summary,
+  .ai-review-section,
+  .ai-review-finding,
+  .ai-request-feedback,
+  .ai-inline-error,
+  .ai-save-message,
+  .ai-commit-overwrite,
+  .ai-review-partial,
+  .ai-review-batch-failures,
+  .image-diff-pane,
+  .image-diff-swipe__stage,
+  .image-diff-swipe--error,
+  .branch-creation-section,
+  .branch-creation-preview,
+  .branch-creation-result,
+  .dashboard-loading__panel,
+  .dashboard-loading__preview,
+  .repo-card__missing-overlay-card,
+  .script-log-dialog__meta-item,
+  .device-auth-dialog__code-section,
+  .device-auth-dialog__code-box,
+  .device-auth-dialog__user-code
+) {
+  border: 0 !important;
+  border-color: transparent !important;
+  box-shadow: var(--app-large-surface-shadow) !important;
+}
+
+/* Toasts are floating feedback, so they need more lift than large in-flow surfaces. */
+body:has(#root) :where(
+  .undo-toast,
+  .import-loading-toast,
+  .status-toast
+) {
+  border: 0 !important;
+  border-color: transparent !important;
+  box-shadow: var(--app-toast-shadow) !important;
+}
+
+body:has(#root) :where(
+  .commit-diff-summary-pill,
+  .commit-diff-header__hash,
+  .commit-diff-header__delta,
+  .commit-diff-file-item__status,
+  .commit-diff-file-item__badge,
+  .commit-diff-placeholder__badge,
+  .commit-diff-file-glyph,
+  .commit-diff-file-header__status,
+  .commit-diff-toggle,
+  .commit-diff-raw,
+  .commit-diff-split,
+  .commit-diff-placeholder,
+  .commit-diff-viewer-state,
+  .commit-diff-large-notice,
+  .working-changes-staging-count,
+  .working-changes-staging-badge,
+  .working-changes-group__count,
+  .branch-attention-detail__chips span,
+  .branch-attention-detail__state,
+  .branch-management-summary > span,
+  .branch-management-tag,
+  .branch-management-state-pill,
+  .commit-history-drawer__meta span,
+  .commit-history-drawer__notice,
+  .commit-history-drawer__count,
+  .commit-history-remote-divider__label,
+  .commit-history-toolbar__count,
+  .commit-history-toolbar__warning,
+  .github-repo-browser__badge,
+  .repo-card__auto-script-indicator,
+  .stash-detail-file__status,
+  .stash-manager-summary > span,
+  .stash-manager-result__axes span,
+  .ai-review-preview__privacy span,
+  .ai-review-coverage__summary span,
+  .ai-review-risk,
+  .ai-review-finding__severity,
+  .ai-review-cache-badge,
+  .ai-commit-status,
+  .ai-config-badge,
+  .ai-key-status,
+  .script-log-dialog__status,
+  .branch-creation-feedback,
+  .branch-creation-validation,
+  .branch-creation-loading,
+  .branch-creation-result__facts > div,
+  .branch-creation-preview dl > div
+) {
+  border: 0 !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+body:has(#root) :where(
+  .branch-attention-detail__row:hover,
+  .branch-management-row:hover,
+  .branch-management-row--selected,
+  .branch-creation-suggestion--selected,
+  .history-group:hover,
+  .history-entry:hover,
+  .script-log-dialog__session-item--active,
+  .stash-detail-file-group > button:hover,
+  .stash-detail-file--selected,
+  .stash-manager-master-list__item--active,
+  .stash-manager-master-list__item:hover,
+  .stash-manager-pagination__active,
+  .ai-review-finding:hover:not(:disabled)
+) {
+  border-color: transparent !important;
+  box-shadow: var(--app-card-highlight-shadow) !important;
+}
+
+body:has(#root) .sidebar__stats .stat-item {
+  box-shadow: var(--app-dashboard-stat-card-shadow) !important;
+}
+
+/* History groups keep the shared floating surface; entries use the stronger family token below. */
+body:has(#root) .history-group {
+  box-shadow: var(--app-floating-card-shadow) !important;
+}
+
+body:has(#root) .history-entry {
+  box-shadow: var(--app-history-entry-shadow) !important;
+}
+
+body:has(#root) .history-group:hover {
+  box-shadow: var(--app-floating-card-hover-shadow) !important;
+}
+
+body:has(#root) .history-entry:hover {
+  box-shadow: var(--app-history-entry-hover-shadow) !important;
+}
+
+/* Embedded history controls belong inside the repo card, not in a new window. */
+body:has(#root) .commit-history-toolbar--embedded {
+  border: 0 !important;
+  border-color: transparent !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Both file lists use the same single visible card surface. */
+body:has(#root) .commit-diff-file-card {
+  box-shadow: var(--app-file-card-shadow) !important;
+}
+
+body:has(#root) .commit-diff-file-card:hover,
+body:has(#root) .commit-diff-file-card:has(.commit-diff-file-card__content:focus-visible) {
+  box-shadow: var(--app-file-card-hover-shadow) !important;
+}
+
+/* The group and sidebar are layout containers, not another visible card. */
+body:has(#root) .working-changes-group,
+body:has(#root) .working-changes-file-list {
+  border: 0 !important;
+  border-color: transparent !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+body:has(#root) .working-changes-sheet .commit-diff-sidebar {
+  border: 0 !important;
+  border-right: 0 !important;
+}

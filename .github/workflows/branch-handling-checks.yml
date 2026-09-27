@@ -1,0 +1,90 @@
+name: Branch handling checks
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    name: Test frontend and backend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install Linux desktop dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev \
+            patchelf \
+            libssl-dev \
+            pkg-config
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit tests
+        run: npm test
+
+      - name: Build frontend
+        run: npm run build
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+
+      - name: Check Rust formatting
+        run: cargo fmt --manifest-path src-tauri/Cargo.toml --check
+
+      - name: Check Rust
+        run: cargo check --manifest-path src-tauri/Cargo.toml
+
+      - name: Run Rust tests
+        run: cargo test --manifest-path src-tauri/Cargo.toml
+
+  branch-creation-cross-platform:
+    name: Branch creation protocol (${{ matrix.os }})
+    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - macos-latest
+          - windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+
+      - name: Run integrated branch creation and process-safety gates
+        run: node --test src/branchManagementActionModel.test.js src/branchManagementIntegratedActions.test.js src/branchManagementLayer.test.js src/branchCreationUtils.test.js src/branchCreationArchitecture.test.js src/branchCreationOperationFlow.test.js src/branchCreationAppBridge.test.js src/windowsBranchProcessSafety.test.js
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Run deterministic branch creation protocol tests
+        run: 'cargo test --manifest-path src-tauri/Cargo.toml branch_creation::'
+
+      - name: Run AI branch naming boundary tests
+        run: 'cargo test --manifest-path src-tauri/Cargo.toml ai::branch_name::tests'
