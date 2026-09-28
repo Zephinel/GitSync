@@ -5557,15 +5557,27 @@ body {
 }
 
 /* ==================== Toggle ==================== */
+/*
+ * The off track must read as its own slot. Bare `--bg-elevated` is nearly
+ * identical to the card, menu, and action surfaces a toggle sits on (about
+ * 1.0:1 against the GitHub browser filter button), and the borderless control
+ * contract removes the track outline, so the fill is the only remaining cue.
+ * The track is derived from `--text-primary` so it stays one clear step above
+ * every surrounding surface in both themes.
+ */
 .toggle {
   position: relative;
   width: 42px;
   height: 24px;
-  background: var(--bg-elevated);
+  background: color-mix(in srgb, var(--text-primary) 24%, var(--bg-elevated) 76%);
   border-radius: 12px;
   cursor: pointer;
   border: 1px solid var(--border-default);
   transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+[data-theme="light"] .toggle:not(.toggle--active) {
+  background: color-mix(in srgb, var(--text-primary) 30%, var(--bg-elevated) 70%);
 }
 
 .toggle--active {
