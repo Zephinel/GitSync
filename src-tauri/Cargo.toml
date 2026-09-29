@@ -1,6 +1,6 @@
 [package]
 name = "git-sync"
-version = "0.1.1"
+version = "0.1.2"
 description = "GitSync - 跨平台 Git 自动同步工具"
 authors = ["Zephinel"]
 edition = "2021"
