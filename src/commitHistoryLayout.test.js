@@ -1156,7 +1156,7 @@ test('commit history overlay closes repository floating surfaces globally', () =
   )
   assert.match(
     appSource,
-    /setImportMenuAnchor\(null\)[\s\S]*?setBottomImportPanelOpen\(false\)[\s\S]*?setIsDashboardSearchOpen\(false\)[\s\S]*?setDashboardSearchKeyword\(''\)/,
+    /setImportMenuAnchor\(null\)[\s\S]*?setIsDashboardSearchOpen\(false\)[\s\S]*?setDashboardSearchKeyword\(''\)/,
     'opening commit history should close dashboard-level transient panels'
   )
 })

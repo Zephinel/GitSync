@@ -62,3 +62,43 @@ test('dashboard empty rendering is driven by the current projection instead of g
   assert.doesNotMatch(appSource, /SHOW_EMPTY_STATE_KEY|showEmptyState|setShowEmptyState/)
   assert.match(appSource, /getDashboardEmptyProjection/)
 })
+
+const readLosslessWebpSize = (assetPath) => {
+  const buffer = readFileSync(assetPath)
+  const chunkIndex = buffer.indexOf('VP8L')
+  assert.notEqual(chunkIndex, -1, 'expected a lossless WebP asset: ' + assetPath)
+  const bits = buffer.readUInt32LE(chunkIndex + 9)
+  return {
+    width: (bits & 0x3fff) + 1,
+    height: ((bits >> 14) & 0x3fff) + 1,
+  }
+}
+
+test('every filter empty state shares one illustration canvas size and one rendered art box', () => {
+  const canvasSizes = new Set()
+  for (const key of EMPTY_STATE_KEYS) {
+    for (const theme of ['light', 'dark']) {
+      const assetPath = srcDir + 'assets/dashboard-empty-states/' + theme + '/' + key + '.webp'
+      const { width, height } = readLosslessWebpSize(assetPath)
+      assert.equal(width, 384, 'unexpected illustration width: ' + assetPath)
+      assert.equal(height, 448, 'unexpected illustration height: ' + assetPath)
+      canvasSizes.add(width + 'x' + height)
+    }
+  }
+  assert.equal(
+    canvasSizes.size,
+    1,
+    'filter empty state illustrations must share one canvas size, got: ' + [...canvasSizes].join(', ')
+  )
+
+  // 一个共用的渲染盒 + 一个窄屏变体，任何按状态单独调尺寸的规则都会让这条断言失败。
+  const artBoxRules = appCssSource.match(/\.dashboard__filter-empty-art\s*\{/g) || []
+  assert.equal(artBoxRules.length, 2, 'expected one shared art box plus its compact variant')
+  assert.match(appCssSource, /\.dashboard__filter-empty-art\s*\{[\s\S]*?width:\s*min\(192px, calc\(100vw - 48px\)\);[\s\S]*?height:\s*224px;/)
+  assert.match(appCssSource, /\.dashboard__filter-empty-image\s*\{[\s\S]*?width:\s*100%;[\s\S]*?height:\s*100%;[\s\S]*?object-fit:\s*contain;/)
+
+  // 空状态占满内容区并居中，由 projection 驱动的修饰类提供。
+  assert.match(appSource, /dashboard-shell--filter-empty/)
+  assert.match(appCssSource, /\.dashboard-shell--filter-empty \.dashboard__filter-empty\s*\{[\s\S]*?flex:\s*1 1 auto;/)
+  assert.match(appCssSource, /\.dashboard-shell--filter-empty \.dashboard-repo-summary\s*\{[\s\S]*?flex:\s*1 1 auto;/)
+})

@@ -243,8 +243,6 @@ test('RepoCard metadata icon actions stay component-owned while operation contro
 
   for (const selector of [
     '.repo-card__branch-row-action',
-    '.add-repo-card__main-trigger',
-    '.add-repo-card__quick-btn',
     '.branch-management-hover-expand',
     '.branch-management-hover-action',
     '.branch-management-icon-action',
@@ -335,8 +333,6 @@ test('registered operation controls use tonal surfaces while composite state sur
   assert.match(overlayRule, /border:\s*0;/)
   assert.match(overlayRule, /background:\s*var\(--app-action-surface-background\)/)
   assert.match(overlayRule, /box-shadow:\s*none;/)
-  assert.match(app, /\.add-repo-card__main-panel,[\s\S]*?border:\s*0;/)
-  assert.match(app, /\.add-repo-card__main-panel,[\s\S]*?box-shadow:\s*var\(--app-large-surface-shadow\)/)
   assert.match(hover, /\.repo-card__branch-row-actions[\s\S]*?background:\s*transparent !important/)
   assert.match(hover, /\.repo-card__branch-row-actions[\s\S]*?box-shadow:\s*none !important/)
 

@@ -6740,7 +6740,6 @@ function App() {
   const [importResultData, setImportResultData] = useState(null)
   const [importLoadingData, setImportLoadingData] = useState(null)
   const [importMenuAnchor, setImportMenuAnchor] = useState(null)
-  const [bottomImportPanelOpen, setBottomImportPanelOpen] = useState(false)
   const [cloneDialogOpen, setCloneDialogOpen] = useState(false)
   const [isCloningRepo, setIsCloningRepo] = useState(false)
   const [lastCloneParentPath, setLastCloneParentPath] = useState(() => readLocalStorageItem(CLONE_PARENT_PATH_STORAGE_KEY) || '')
@@ -7177,7 +7176,6 @@ function App() {
   const dashboardSearchFiltersRef = useRef(null)
   const dashboardToolbarControlsRef = useRef(null)
   const dashboardSearchInputRef = useRef(null)
-  const bottomImportCardRef = useRef(null)
   const [repoGridColumns, setRepoGridColumns] = useState(1)
   const gitTaskConcurrency = normalizeSyncConcurrency(settings.maxSyncConcurrency)
 
@@ -7848,7 +7846,6 @@ function App() {
 
   useEffect(() => {
     if (page !== 'dashboard') {
-      setBottomImportPanelOpen(false)
       setImportMenuAnchor(null)
     }
   }, [page])
@@ -9301,21 +9298,10 @@ function App() {
     setImportMenuAnchor(null)
   }, [])
 
-  const closeBottomImportPanel = useCallback(() => {
-    setBottomImportPanelOpen(false)
-  }, [])
-
-  const toggleBottomImportPanel = useCallback(() => {
-    if (isRepoImportBusy) return
-    setImportMenuAnchor(null)
-    setBottomImportPanelOpen((prev) => !prev)
-  }, [isRepoImportBusy])
-
   const openImportEntryMenu = useCallback((event) => {
     if (isRepoImportBusy) return
     const anchorRect = event?.currentTarget?.getBoundingClientRect?.()
     if (!anchorRect) return
-    setBottomImportPanelOpen(false)
     setImportMenuAnchor({
       top: Math.round(anchorRect.top),
       bottom: Math.round(anchorRect.bottom),
@@ -9342,35 +9328,6 @@ function App() {
       document.removeEventListener('keydown', handleKeyDown)
     }
   }, [importMenuAnchor])
-
-  useEffect(() => {
-    if (!bottomImportPanelOpen) return undefined
-
-    const handlePointerDown = (event) => {
-      if (!bottomImportCardRef.current) return
-      if (bottomImportCardRef.current.contains(event.target)) return
-      setBottomImportPanelOpen(false)
-    }
-
-    const handleKeyDown = (event) => {
-      if (event.key === 'Escape') {
-        setBottomImportPanelOpen(false)
-      }
-    }
-
-    document.addEventListener('mousedown', handlePointerDown)
-    document.addEventListener('keydown', handleKeyDown)
-    return () => {
-      document.removeEventListener('mousedown', handlePointerDown)
-      document.removeEventListener('keydown', handleKeyDown)
-    }
-  }, [bottomImportPanelOpen])
-
-  useEffect(() => {
-    if (isRepoImportBusy) {
-      setBottomImportPanelOpen(false)
-    }
-  }, [isRepoImportBusy])
 
   const applyDefaultRepoSettings = useCallback(async (repoId) => {
     await invoke('update_repo', {
@@ -9565,20 +9522,17 @@ function App() {
 
   const handleSelectImportLocal = () => {
     closeImportEntryMenu()
-    closeBottomImportPanel()
     void handleImportLocalRepos()
   }
 
   const handleSelectCloneRepo = () => {
     closeImportEntryMenu()
-    closeBottomImportPanel()
     if (isRepoImportBusy) return
     setCloneDialogOpen(true)
   }
 
   const handleSelectGithubRepos = async () => {
     closeImportEntryMenu()
-    closeBottomImportPanel()
     if (isRepoImportBusy) return
     if (!githubAccount) {
       const restoredAccount = await restoreGithubAccountOnDemand()
@@ -9705,7 +9659,6 @@ function App() {
   const isSyncFilteredRunning = isSyncFilteredPreparing || isSyncFilteredActive
   const syncAllButtonLabel = isSyncAllRunning ? '同步中...' : '全部同步'
   const syncChangedOnlyButtonLabel = isSyncChangedOnlyRunning ? '同步中...' : '按改动同步'
-  const importCardText = isRepoImportBusy ? (isCloningRepo ? '正在克隆仓库...' : '正在导入仓库...') : '导入仓库'
   const isBatchSyncing = activeSyncJobs.some((job) => job.source === 'batch')
   const failedRepoIds = repos
     .filter((repo) => !missingRepoIdsRef.current.has(repo.id))
@@ -10051,7 +10004,6 @@ function App() {
     }
     const defaultBranch = getCommitHistoryDefaultBranch(repo, repoStatuses[repoId])
     setImportMenuAnchor(null)
-    setBottomImportPanelOpen(false)
     setIsDashboardSearchOpen(false)
     setDashboardSearchKeyword('')
     setPage('dashboard')
@@ -11023,6 +10975,7 @@ function App() {
   ].filter(Boolean).join(' ')
   const dashboardShellClassName = [
     'dashboard-shell',
+    dashboardEmptyProjection.kind === DASHBOARD_EMPTY_PROJECTION_KIND.filter ? 'dashboard-shell--filter-empty' : '',
     isCommitHistoryDrawerOpen ? 'dashboard-shell--commit-history-open' : '',
     commitHistoryDrawerClosing ? 'dashboard-shell--commit-history-closing' : '',
     isCommitHistoryDrawerOpen ? `dashboard-shell--${dashboardLayout}` : '',
@@ -11451,64 +11404,6 @@ function App() {
                     />
                   </section>
               )}
-              </div>
-              <div className="dashboard-add-repo">
-              <div
-                ref={bottomImportCardRef}
-                className={`add-repo-card ${isRepoImportBusy ? 'add-repo-card--disabled' : ''} ${bottomImportPanelOpen ? 'add-repo-card--expanded' : ''}`}
-                aria-disabled={isRepoImportBusy}
-              >
-                <div className="add-repo-card__content">
-                  <button
-                    type="button"
-                    className="add-repo-card__main-panel add-repo-card__main-trigger"
-                    onClick={toggleBottomImportPanel}
-                    disabled={isRepoImportBusy}
-                    aria-expanded={bottomImportPanelOpen}
-                    aria-label={bottomImportPanelOpen ? '收起导入方式' : '展开导入方式'}
-                  >
-                    <div className="add-repo-card__main">
-                      <Icons.plus className="icon icon--lg add-repo-card__icon" />
-                      <span className="add-repo-card__text">{importCardText}</span>
-                      <span className="add-repo-card__hint">
-                        {bottomImportPanelOpen ? '选择一种导入方式开始操作' : '点击展开导入方式'}
-                      </span>
-                    </div>
-                  </button>
-                  <div
-                    className="add-repo-card__quick-panel"
-                  >
-                    <div className="add-repo-card__quick-shell">
-                      <div className="add-repo-card__quick-actions">
-                        <button
-                          className="add-repo-card__quick-btn"
-                          onClick={handleSelectImportLocal}
-                          disabled={isRepoImportBusy}
-                        >
-                          <Icons.folder className="icon icon--sm" />
-                          <span>本地导入</span>
-                        </button>
-                        <button
-                          className="add-repo-card__quick-btn"
-                          onClick={handleSelectCloneRepo}
-                          disabled={isRepoImportBusy}
-                        >
-                          <Icons.cloneRepo className="icon icon--sm" />
-                          <span>克隆仓库</span>
-                        </button>
-                        <button
-                          className="add-repo-card__quick-btn"
-                          onClick={handleSelectGithubRepos}
-                          disabled={isRepoImportBusy}
-                        >
-                          <Icons.github className="icon icon--sm" />
-                          <span>GitHub 仓库</span>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
               </div>
             </div>
           </div>
