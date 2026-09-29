@@ -1449,7 +1449,7 @@ dependencies = [
 
 [[package]]
 name = "git-sync"
-version = "0.1.4"
+version = "0.1.3"
 dependencies = [
  "arboard",
  "chrono",
