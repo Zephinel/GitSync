@@ -6844,6 +6844,27 @@ body {
   background: var(--status-warning-bg);
 }
 
+/*
+ * 顶栏窄屏形态：控件一行、图标组一行，断点决定换行而不是靠自然溢出。
+ *
+ * 自然溢出会先让控件组内部断行、再把图标组整体挤下去，最多凑出三行且每行右端参差；
+ * 这里改成两行：第一行筛选/排序/同步按钮按自然宽度从左边排，第二行图标组与宽屏一样贴右。
+ *
+ * 控件一律不拉伸：旧规则用 `field flex: 1 1 190px` 撑开 field、而 select 仍被卡在
+ * 164px/140px，多出来的宽度成了 field 内部的死白，顶在两个下拉之间，看起来像被撑开。
+ * 现在两个下拉之间恒等于宽屏下的 82px。
+ */
+@media (max-width: 1040px) {
+  .dashboard-toolbar__controls,
+  .dashboard-toolbar__actions {
+    flex: 1 1 100%;
+  }
+
+  .dashboard-toolbar__actions {
+    justify-content: flex-end;
+  }
+}
+
 @media (max-width: 900px) {
   .import-result-dialog__stats {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -6870,22 +6891,6 @@ body {
   .batch-toolbar__actions {
     width: 100%;
     justify-content: flex-start;
-  }
-
-  .dashboard-toolbar__controls {
-    flex: 1 1 100%;
-  }
-
-  .dashboard-toolbar__field {
-    flex: 1 1 190px;
-  }
-
-  .dashboard-toolbar__filter-select {
-    width: min(100%, 164px);
-  }
-
-  .dashboard-toolbar__sort-select {
-    width: min(100%, 140px);
   }
 }
 
