@@ -88,4 +88,10 @@ test('窄屏收起侧边栏的接线：测量、类名、按钮与动画都在',
   assert.match(appSource, /aria-controls="app-sidebar"/)
   assert.match(appSource, /id="app-sidebar"/)
   assert.match(registrySource, /sidebarPanel: SidebarPanelIcon,/)
+
+  // 形状与同排按钮一致：36×36 与 --radius-md（少了圆角会变成直角方块）
+  assert.match(
+    cssSource,
+    /\.dashboard__header-actions \.dashboard-toolbar__sidebar-toggle \{[\s\S]*?width:\s*36px;[\s\S]*?height:\s*36px;[\s\S]*?border-radius:\s*var\(--radius-md\);/
+  )
 })
