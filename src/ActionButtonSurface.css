@@ -140,6 +140,7 @@ body:has(#root) :where(
   .commit-diff-sidebar-handle,
   .commit-diff-wrap-toggle,
   .dashboard__add-btn,
+  .dashboard-toolbar__sidebar-toggle,
   .repo-card__branch-row-action,
   .repo-card__branch-attention-action,
   .repo-card__working-changes-action,

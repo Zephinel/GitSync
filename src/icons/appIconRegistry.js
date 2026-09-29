@@ -29,6 +29,7 @@ import {
   RefreshSyncIcon,
   SearchIcon,
   SettingsIcon,
+  SidebarPanelIcon,
   SunIcon,
   TerminalIcon,
   WarningIcon,
@@ -67,5 +68,6 @@ export const APP_ICONS = Object.freeze({
   cloneRepo: CloneRepoIcon,
   listLayout: ListLayoutIcon,
   masonryLayout: MasonryLayoutIcon,
+  sidebarPanel: SidebarPanelIcon,
   more: MoreIcon,
 })

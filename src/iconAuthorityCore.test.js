@@ -43,6 +43,7 @@ const APP_ICON_KEYS = [
   'cloneRepo',
   'listLayout',
   'masonryLayout',
+  'sidebarPanel',
   'more',
 ]
 

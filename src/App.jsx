@@ -35,6 +35,7 @@ import {
   DASHBOARD_EMPTY_PROJECTION_KIND,
   getDashboardEmptyProjection,
 } from './dashboardEmptyProjection.js'
+import { shouldCollapseSidebar } from './sidebarFitAuthority.js'
 import {
   buildDashboardRows,
   normalizeDashboardLayout,
@@ -2091,6 +2092,7 @@ function Sidebar({
   failedRepoCount,
   canRevealFailedSync,
   interactive = true,
+  collapsed = false,
 }) {
   const [showHoverSyncActions, setShowHoverSyncActions] = useState(false)
   const revealTimerRef = useRef(null)
@@ -2165,9 +2167,10 @@ function Sidebar({
 
   return (
     <div
+      id="app-sidebar"
       className="sidebar"
-      aria-hidden={interactive ? undefined : 'true'}
-      inert={interactive ? undefined : true}
+      aria-hidden={interactive && !collapsed ? undefined : 'true'}
+      inert={interactive && !collapsed ? undefined : true}
       onMouseEnter={handleSidebarMouseEnter}
       onMouseLeave={handleSidebarMouseLeave}
     >
@@ -6752,6 +6755,9 @@ function App() {
   const [importResultData, setImportResultData] = useState(null)
   const [importLoadingData, setImportLoadingData] = useState(null)
   const [importMenuAnchor, setImportMenuAnchor] = useState(null)
+  // 窄屏下侧边栏的自动收起：override 记录用户在本次会话里的手动选择（null 表示跟随自动判定）。
+  const [sidebarOverride, setSidebarOverride] = useState(null)
+  const [toolbarNeedsCollapse, setToolbarNeedsCollapse] = useState(false)
   const [cloneDialogOpen, setCloneDialogOpen] = useState(false)
   const [isCloningRepo, setIsCloningRepo] = useState(false)
   const [lastCloneParentPath, setLastCloneParentPath] = useState(() => readLocalStorageItem(CLONE_PARENT_PATH_STORAGE_KEY) || '')
@@ -7210,6 +7216,7 @@ function App() {
   const dashboardSearchFiltersRef = useRef(null)
   const dashboardToolbarControlsRef = useRef(null)
   const dashboardSearchInputRef = useRef(null)
+  const dashboardToolbarRowRef = useRef(null)
   const [repoGridColumns, setRepoGridColumns] = useState(1)
   const gitTaskConcurrency = normalizeSyncConcurrency(settings.maxSyncConcurrency)
 
@@ -7883,6 +7890,78 @@ function App() {
       setImportMenuAnchor(null)
     }
   }, [page])
+
+  // 顶栏一行放不下时收起侧边栏，把这 240px 还给主区，而不是让顶栏换行。
+  // 宽度是实测的：字号、字体回退和语言都会改变顶栏的自然宽度，写死断点会漂移。
+  const measureToolbarFit = useCallback(() => {
+    const row = dashboardToolbarRowRef.current
+    const controls = row?.querySelector('.dashboard-toolbar__controls')
+    const actions = row?.querySelector('.dashboard-toolbar__actions')
+    if (!row || !controls || !actions) {
+      setToolbarNeedsCollapse(false)
+      return
+    }
+
+    const rowGap = Number.parseFloat(getComputedStyle(row).columnGap) || 0
+    // 强制单行量一次，得到的是「一行所需宽度」而不是当前换行后的宽度。
+    // 类在同一帧内加删，浏览器不会把它绘制出来。
+    row.classList.add('dashboard__header-actions--measure')
+    const requiredRowWidth = controls.scrollWidth + actions.scrollWidth + rowGap
+    row.classList.remove('dashboard__header-actions--measure')
+
+    const rootStyle = getComputedStyle(document.documentElement)
+    const sidebarWidth = Number.parseFloat(rootStyle.getPropertyValue('--sidebar-width'))
+    const mainContent = document.querySelector('.main-content')
+    const mainStyle = mainContent ? getComputedStyle(mainContent) : null
+    const mainPadding = mainStyle
+      ? (Number.parseFloat(mainStyle.paddingLeft) || 0) + (Number.parseFloat(mainStyle.paddingRight) || 0)
+      : 0
+
+    setToolbarNeedsCollapse(shouldCollapseSidebar({
+      requiredRowWidth,
+      sidebarWidth,
+      mainPadding,
+      windowWidth: window.innerWidth,
+    }))
+  }, [])
+
+  const handleToggleSidebar = useCallback(() => {
+    setSidebarOverride((previous) => (previous === 'open' ? 'closed' : 'open'))
+  }, [])
+
+  useEffect(() => {
+    if (page !== 'dashboard' || !appReady) {
+      setToolbarNeedsCollapse(false)
+      return undefined
+    }
+    measureToolbarFit()
+    // 顶栏用的 Inter 是外部字体，字体就绪后宽度会变，就绪后再量一次。
+    let cancelled = false
+    if (typeof document !== 'undefined' && document.fonts?.ready) {
+      document.fonts.ready
+        .then(() => { if (!cancelled) measureToolbarFit() })
+        .catch(() => {})
+    }
+    return () => { cancelled = true }
+  }, [page, appReady, measureToolbarFit])
+
+  useEffect(() => {
+    let frame = 0
+    const handleResize = () => {
+      cancelAnimationFrame(frame)
+      frame = requestAnimationFrame(() => measureToolbarFit())
+    }
+    window.addEventListener('resize', handleResize)
+    return () => {
+      cancelAnimationFrame(frame)
+      window.removeEventListener('resize', handleResize)
+    }
+  }, [measureToolbarFit])
+
+  useEffect(() => {
+    // 宽到一行放得下时清掉窄屏下的手动选择，回到自动判定。
+    if (!toolbarNeedsCollapse) setSidebarOverride(null)
+  }, [toolbarNeedsCollapse])
 
   useEffect(() => {
     if (typeof window === 'undefined' || typeof document === 'undefined') return undefined
@@ -11006,8 +11085,11 @@ function App() {
   )
     ? commitHistoryBranchOverviewState.error
     : ''
+  // 自动收起 + 本次会话里的手动覆盖：手动展开后即使仍然很窄也保持展开（顶栏在那种情况下会换行）。
+  const sidebarCollapsed = toolbarNeedsCollapse && sidebarOverride !== 'open'
   const appLayoutClassName = [
     'app-layout',
+    sidebarCollapsed ? 'app-layout--sidebar-collapsed' : '',
     isCommitHistoryDrawerOpen ? 'app-layout--commit-history-session' : '',
     isCommitHistoryLayoutOpen ? 'app-layout--commit-history-open' : '',
   ].filter(Boolean).join(' ')
@@ -11152,6 +11234,7 @@ function App() {
         failedRepoCount={failedRepoCount}
         canRevealFailedSync={!hasActiveSyncJobs}
         interactive={!isCommitHistoryDrawerOpen}
+        collapsed={sidebarCollapsed}
       />
       <main
         className="main-content"
@@ -11188,7 +11271,20 @@ function App() {
           <div className={dashboardShellClassName}>
             <div className="dashboard-shell__main">
               <div className="dashboard__header">
-              <div className="dashboard__header-actions">
+              <div className="dashboard__header-actions" ref={dashboardToolbarRowRef}>
+                {toolbarNeedsCollapse ? (
+                  <button
+                    type="button"
+                    className="dashboard-toolbar__sidebar-toggle"
+                    onClick={handleToggleSidebar}
+                    aria-label={sidebarCollapsed ? '展开侧边栏' : '收起侧边栏'}
+                    aria-expanded={!sidebarCollapsed}
+                    aria-controls="app-sidebar"
+                    data-app-tooltip={sidebarCollapsed ? '展开侧边栏' : '收起侧边栏'}
+                  >
+                    <Icons.sidebarPanel className="icon icon--sm" />
+                  </button>
+                ) : null}
                 <div className="dashboard-toolbar__controls" ref={dashboardToolbarControlsRef}>
                   <div className="dashboard-toolbar__field">
                     <span className="dashboard-toolbar__label">筛选</span>

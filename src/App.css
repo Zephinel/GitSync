@@ -84,6 +84,9 @@
 /* ==================== 通用变量 ==================== */
 :root {
   --sidebar-width: 240px;
+  /* 侧边栏滑动（收起/展开）的节奏；提交历史复用同一组变量但换成它自己的时长。 */
+  --sidebar-slide-duration: 280ms;
+  --sidebar-slide-ease: cubic-bezier(0.22, 1, 0.36, 1);
   --commit-history-motion-duration: 820ms;
   --commit-history-motion-ease: cubic-bezier(0.18, 0.88, 0.2, 1);
   --radius-sm: 8px;
@@ -206,6 +209,13 @@ body {
   flex: 1;
   height: 100vh;
   overflow: hidden;
+  transition: grid-template-columns var(--sidebar-slide-duration) var(--sidebar-slide-ease);
+}
+
+/* 提交历史打开时侧边栏本来就滑出去，那一档沿用抽屉的节奏。 */
+.app-layout--commit-history-open {
+  --sidebar-slide-duration: var(--commit-history-motion-duration);
+  --sidebar-slide-ease: var(--commit-history-motion-ease);
 }
 
 /* ==================== Sidebar ==================== */
@@ -220,13 +230,27 @@ body {
   transform: translateX(0);
   opacity: 1;
   transition:
-    transform var(--commit-history-motion-duration) var(--commit-history-motion-ease),
+    transform var(--sidebar-slide-duration) var(--sidebar-slide-ease),
     opacity 420ms ease,
     background var(--transition-normal),
     border-color var(--transition-normal);
 }
 
 .app-layout--commit-history-open .sidebar {
+  transform: translateX(calc(-1 * var(--sidebar-width)));
+  opacity: 0;
+  pointer-events: none;
+}
+
+/*
+ * 窄屏放不下顶栏时收起侧边栏：列宽收到 0，主区自然占满这 240px。
+ * 列宽与侧边栏滑动用同一组时长/曲线，滑出的右边缘始终贴着列边界，不会盖住主区。
+ */
+.app-layout--sidebar-collapsed {
+  grid-template-columns: 0 minmax(0, 1fr);
+}
+
+.app-layout--sidebar-collapsed .sidebar {
   transform: translateX(calc(-1 * var(--sidebar-width)));
   opacity: 0;
   pointer-events: none;
@@ -491,6 +515,11 @@ body {
   transform: translateX(calc(-1 * var(--sidebar-width)));
 }
 
+/* 侧边栏收起时已经让出了宽度，提交历史不需要再位移一次主区。 */
+.app-layout--sidebar-collapsed.app-layout--commit-history-open .main-content {
+  transform: none;
+}
+
 .app-layout--commit-history-session .main-content {
   overflow-y: hidden;
   overscroll-behavior: none;
@@ -529,6 +558,19 @@ body {
   margin-left: auto;
 }
 
+/*
+ * 测量用：强制单行并让行取 max-content，读到的是「一行放得下所需宽度」，
+ * 而不是当前换行后的宽度。类只在一次同步读取内加删（同一帧），不会被绘制。
+ */
+.dashboard__header-actions--measure {
+  width: max-content !important;
+}
+
+.dashboard__header-actions--measure,
+.dashboard__header-actions--measure .dashboard-toolbar__controls {
+  flex-wrap: nowrap !important;
+}
+
 .dashboard-toolbar__field {
   display: inline-flex;
   align-items: center;
@@ -541,6 +583,15 @@ body {
   font-size: 12px;
   font-weight: 900 !important;
   white-space: nowrap;
+}
+
+/* 顶栏左上角的侧边栏开关：只在窄到需要收起时出现，尺寸与同一行的其它按钮一致。 */
+.dashboard__header-actions .dashboard-toolbar__sidebar-toggle {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  justify-content: center;
+  padding: 0;
 }
 
 .dashboard-toolbar__filter-select {
@@ -2928,6 +2979,13 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .dashboard__header-actions .layout-switcher::before {
+    transition-duration: 1ms;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-layout,
+  .sidebar {
     transition-duration: 1ms;
   }
 }
@@ -6842,27 +6900,6 @@ body {
 .status-toast__btn:hover {
   border-color: var(--status-warning);
   background: var(--status-warning-bg);
-}
-
-/*
- * 顶栏窄屏形态：控件一行、图标组一行，断点决定换行而不是靠自然溢出。
- *
- * 自然溢出会先让控件组内部断行、再把图标组整体挤下去，最多凑出三行且每行右端参差；
- * 这里改成两行：第一行筛选/排序/同步按钮按自然宽度从左边排，第二行图标组与宽屏一样贴右。
- *
- * 控件一律不拉伸：旧规则用 `field flex: 1 1 190px` 撑开 field、而 select 仍被卡在
- * 164px/140px，多出来的宽度成了 field 内部的死白，顶在两个下拉之间，看起来像被撑开。
- * 现在两个下拉之间恒等于宽屏下的 82px。
- */
-@media (max-width: 1040px) {
-  .dashboard-toolbar__controls,
-  .dashboard-toolbar__actions {
-    flex: 1 1 100%;
-  }
-
-  .dashboard-toolbar__actions {
-    justify-content: flex-end;
-  }
 }
 
 @media (max-width: 900px) {

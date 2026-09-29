@@ -50,6 +50,7 @@ import {
   SEARCH_ICON,
   SELECT_CHEVRON_ICON,
   SETTINGS_ICON,
+  SIDEBAR_PANEL_ICON,
   SPLIT_VIEW_ICON,
   STASH_ICON,
   SUCCESS_ICON,
@@ -116,6 +117,7 @@ export const ReviewIcon = iconComponent(REVIEW_ICON)
 export const SearchIcon = iconComponent(SEARCH_ICON)
 export const SelectChevronIcon = iconComponent(SELECT_CHEVRON_ICON)
 export const SettingsIcon = iconComponent(SETTINGS_ICON)
+export const SidebarPanelIcon = iconComponent(SIDEBAR_PANEL_ICON)
 export const SplitViewIcon = iconComponent(SPLIT_VIEW_ICON)
 export const StashIcon = iconComponent(STASH_ICON)
 export const SuccessIcon = iconComponent(SUCCESS_ICON)
