@@ -254,6 +254,41 @@ test('keychain account restore is lazy and not wired to startup effects', () => 
   )
 })
 
+test('a GitHub connectivity failure is not reported as a logged-out account', () => {
+  const commandsSource = readFileSync(join(__dirname, '..', 'src-tauri', 'src', 'commands.rs'), 'utf8')
+  const deviceAuthSource = readFileSync(join(__dirname, 'DeviceAuthDialog.jsx'), 'utf8')
+
+  // 钥匙串「没有这一项」和「有但读不到」必须分开返回，否则访问受限会被显示成未登录。
+  assert.match(commandsSource, /fn read_github_token\(\) -> Result<Option<String>, String>/)
+  assert.match(commandsSource, /Err\(keyring::Error::NoEntry\) => Ok\(None\)/)
+
+  // 账号查询返回结构化状态，网络/钥匙串失败不再折叠成 Err。
+  assert.match(commandsSource, /pub enum GithubAccountLookup/)
+  for (const variant of ['NoToken', 'Unauthorized', 'KeychainUnavailable', 'NetworkUnavailable', 'RequestFailed']) {
+    assert.match(commandsSource, new RegExp(variant))
+  }
+  assert.match(commandsSource, /fn describe_request_error\(error: &reqwest::Error\) -> String/)
+  assert.match(commandsSource, /map_err\(\|e\| format!\("请求失败: \{\}", describe_request_error\(&e\)\)\)/)
+
+  // device flow 收尾：token 先落盘，账号信息取不到时返回可重试的结构化结果。
+  const pollCommand = sourceBetween(commandsSource, 'pub async fn github_poll_token', 'pub fn github_cancel_device_auth')
+  assert.ok(
+    pollCommand.indexOf('store_github_token(&token)?') < pollCommand.indexOf('GITHUB_API_USER_URL'),
+    'the device-flow token must be stored before the account lookup'
+  )
+  assert.match(pollCommand, /GithubLoginOutcome::AccountUnavailable/)
+
+  // 前端只在「没有凭据 / 凭据失效」时回到未登录；其余失败保留状态并提示。
+  assert.match(appSource, /if \(status === 'no-token' \|\| status === 'unauthorized'\) \{[\s\S]*?setGithubAccount\(null\)/)
+  assert.match(appSource, /function buildGithubConnectivityNotice\(restored\) \{/)
+  assert.match(appSource, /setNoticeData\(buildGithubConnectivityNotice\(restored\)\)/)
+  assert.match(appSource, /scope: 'github-login'/)
+
+  // 已授权但取账号失败时，对话框的「重试」只重取账号，不重新走一遍浏览器授权。
+  assert.match(deviceAuthSource, /result\?\.status === 'account-unavailable'[\s\S]*?setRetryAccountOnly\(true\)/)
+  assert.match(deviceAuthSource, /if \(retryAccountOnly\) \{[\s\S]*?invoke\('github_get_account'\)/)
+})
+
 test('branch rows use explicit action buttons instead of row click handlers', () => {
   const branchRowMarkup = sourceBetween(
     appSource,

@@ -2,6 +2,22 @@ import { useState, useEffect, useRef } from 'react'
 import { invoke } from '@tauri-apps/api/core'
 import { openUrl } from '@tauri-apps/plugin-opener'
 
+// 把 Rust 侧的结构化状态翻成用户能照着做的事，而不是把状态码直接抛给用户。
+function describeGithubAccountLookupFailure(result) {
+  switch (result?.status) {
+    case 'no-token':
+      return '钥匙串里没有 GitHub 凭据，请重新登录 GitHub'
+    case 'unauthorized':
+      return 'GitHub 凭据已失效，请重新登录 GitHub'
+    case 'keychain-unavailable':
+      return `无法读取钥匙串中的凭据：${result.message || '未知错误'}`
+    case 'network-unavailable':
+      return `无法连接 GitHub（api.github.com）：${result.message || '未知错误'}`
+    default:
+      return result?.message || '未知错误'
+  }
+}
+
 export function DeviceAuthDialog({ Icons, onAccountUpdate, onClose }) {
   const [step, setStep] = useState('idle')
   const [deviceCode, setDeviceCode] = useState('')
@@ -10,6 +26,9 @@ export function DeviceAuthDialog({ Icons, onAccountUpdate, onClose }) {
   const [errorText, setErrorText] = useState('')
   const [expiresAt, setExpiresAt] = useState(null)
   const [copied, setCopied] = useState(false)
+  // 授权已成功、token 也已落盘，只是这次没取到账号信息：此时「重试」只重取账号，
+  // 不该让用户重新去浏览器授权一遍。
+  const [retryAccountOnly, setRetryAccountOnly] = useState(false)
   const pollTimerRef = useRef(null)
   const pollIntervalRef = useRef(5000)
   const epochRef = useRef(0)
@@ -62,8 +81,16 @@ export function DeviceAuthDialog({ Icons, onAccountUpdate, onClose }) {
     async function poll() {
       if (epoch !== epochRef.current) return
       try {
-        const account = await invoke('github_poll_token', { deviceCode: code, sessionId })
+        const result = await invoke('github_poll_token', { deviceCode: code, sessionId })
         if (epoch !== epochRef.current) return
+        if (result?.status === 'account-unavailable') {
+          sessionIdRef.current = null
+          setRetryAccountOnly(true)
+          setErrorText(`已获得授权，但暂时无法读取 GitHub 账号信息：${result.message || '未知错误'}`)
+          setStep('error')
+          return
+        }
+        const account = result?.status === 'ok' ? result.account : result
         sessionIdRef.current = null
         setStep('done')
         onAccountUpdate(account)
@@ -106,6 +133,23 @@ export function DeviceAuthDialog({ Icons, onAccountUpdate, onClose }) {
   }
 
   const handleRetry = async () => {
+    if (retryAccountOnly) {
+      // token 已经在钥匙串里，这里只重取账号信息，不必重新授权。
+      setErrorText('正在重新读取 GitHub 账号信息...')
+      try {
+        const result = await invoke('github_get_account')
+        if (result?.status === 'ok' && result.account?.login) {
+          setRetryAccountOnly(false)
+          setStep('done')
+          onAccountUpdate(result.account)
+          return
+        }
+        setErrorText(`仍然无法读取 GitHub 账号信息：${describeGithubAccountLookupFailure(result)}`)
+      } catch (e) {
+        setErrorText(`仍然无法读取 GitHub 账号信息：${String(e?.message ?? e)}`)
+      }
+      return
+    }
     epochRef.current += 1
     clearTimeout(pollTimerRef.current)
     try {
@@ -115,6 +159,7 @@ export function DeviceAuthDialog({ Icons, onAccountUpdate, onClose }) {
       return
     }
     autoCopiedCodeRef.current = ''
+    setRetryAccountOnly(false)
     setStep('idle')
     setErrorText('')
     setDeviceCode('')

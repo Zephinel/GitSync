@@ -4710,13 +4710,53 @@ fn get_github_client_id() -> Result<String, String> {
 
 const GITHUB_KEYRING_SERVICE: &str = "gitsync-github";
 const GITHUB_KEYRING_ACCOUNT: &str = "default";
+const GITHUB_API_USER_URL: &str = "https://api.github.com/user";
 
-pub(crate) fn get_github_token() -> Result<String, String> {
+/// 读取钥匙串里的 GitHub token。
+///
+/// `Ok(None)` 表示确实没有凭据（真·未登录）；`Err` 表示钥匙串里有但这次读不到
+/// （访问被拒绝、钥匙串锁定等）。两者必须区分：否则一次读取失败就会被 UI 显示成
+/// 「未登录」，把用户推去重新走一遍浏览器授权。
+pub(crate) fn read_github_token() -> Result<Option<String>, String> {
     let entry = keyring::Entry::new(GITHUB_KEYRING_SERVICE, GITHUB_KEYRING_ACCOUNT)
         .map_err(|e| format!("keyring 初始化失败: {e}"))?;
-    entry
-        .get_password()
-        .map_err(|e| format!("未登录 GitHub，请先登录: {e}"))
+    match entry.get_password() {
+        Ok(token) => Ok(Some(token)),
+        Err(keyring::Error::NoEntry) => Ok(None),
+        Err(e) => Err(format!("无法读取钥匙串中的 GitHub 凭据: {e}")),
+    }
+}
+
+pub(crate) fn get_github_token() -> Result<String, String> {
+    match read_github_token()? {
+        Some(token) => Ok(token),
+        None => Err("未登录 GitHub，请先登录".to_string()),
+    }
+}
+
+/// reqwest 的 Display 只有一句 `error sending request for url (...)`，看不出是 DNS、
+/// 连接、超时还是 TLS。把类型和 source 链一起带上，现场才有得判断。
+pub(crate) fn describe_request_error(error: &reqwest::Error) -> String {
+    let kind = if error.is_timeout() {
+        "超时"
+    } else if error.is_connect() {
+        "连接失败"
+    } else if error.is_decode() {
+        "响应解析失败"
+    } else if error.is_body() {
+        "请求体错误"
+    } else if error.is_request() {
+        "请求发送失败"
+    } else {
+        "未知"
+    };
+    let mut parts = vec![error.to_string(), format!("类型: {kind}")];
+    let mut cause = std::error::Error::source(error);
+    while let Some(source) = cause {
+        parts.push(format!("原因: {source}"));
+        cause = source.source();
+    }
+    parts.join("；")
 }
 
 fn store_github_token(token: &str) -> Result<(), String> {
@@ -4769,7 +4809,7 @@ pub async fn github_start_device_auth(
         .form(&params)
         .send()
         .await
-        .map_err(|e| format!("请求失败: {e}"))?;
+        .map_err(|e| format!("请求失败: {}", describe_request_error(&e)))?;
 
     if !resp.status().is_success() {
         let body = resp.text().await.unwrap_or_default();
@@ -4779,7 +4819,7 @@ pub async fn github_start_device_auth(
     let mut auth = resp
         .json::<DeviceAuthResponse>()
         .await
-        .map_err(|e| format!("解析响应失败: {e}"))?;
+        .map_err(|e| format!("解析响应失败: {}", describe_request_error(&e)))?;
     if !state
         .device_auth_session
         .lock()
@@ -4792,12 +4832,24 @@ pub async fn github_start_device_auth(
     Ok(auth)
 }
 
+#[derive(Debug, Serialize)]
+#[serde(tag = "status", rename_all = "kebab-case")]
+pub enum GithubLoginOutcome {
+    Ok {
+        account: GithubAccount,
+    },
+    /// 已经拿到并保存了 token，只是这次没取到账号信息，可以只重试取账号。
+    AccountUnavailable {
+        message: String,
+    },
+}
+
 #[tauri::command]
 pub async fn github_poll_token(
     device_code: String,
     session_id: u64,
     state: State<'_, AppState>,
-) -> Result<GithubAccount, String> {
+) -> Result<GithubLoginOutcome, String> {
     if !state
         .device_auth_session
         .lock()
@@ -4821,12 +4873,12 @@ pub async fn github_poll_token(
         .form(&params)
         .send()
         .await
-        .map_err(|e| format!("请求失败: {e}"))?;
+        .map_err(|e| format!("请求失败: {}", describe_request_error(&e)))?;
 
     let token_resp: GithubAccessTokenResponse = resp
         .json()
         .await
-        .map_err(|e| format!("解析响应失败: {e}"))?;
+        .map_err(|e| format!("解析响应失败: {}", describe_request_error(&e)))?;
 
     if let Some(error) = token_resp.error {
         match error.as_str() {
@@ -4842,31 +4894,48 @@ pub async fn github_poll_token(
         .access_token
         .ok_or_else(|| "未获取到 access token".to_string())?;
 
-    let user_resp = client
-        .get("https://api.github.com/user")
+    // 先落盘 token 再取账号信息：device flow 的授权结果不能被一次网络抖动吃掉，
+    // 否则用户要重新走一遍浏览器授权。凭据写入后 credential_broker 的会话缓存
+    // 会同步更新，所以重试取账号时不需要再读一次钥匙串。
+    //
+    // 会话状态在这一块里更新完毕，不留 MutexGuard 跨过下面的 await（否则 future 不是 Send）。
+    {
+        let mut session = state.device_auth_session.lock().unwrap();
+        if !session.is_active(session_id, &device_code) {
+            return Err("登录请求已取消".to_string());
+        }
+        store_github_token(&token)?;
+        session.active = Some((session_id, device_code.clone(), true));
+    }
+
+    let user_resp = match client
+        .get(GITHUB_API_USER_URL)
         .header("Authorization", format!("Bearer {}", &token))
         .header("Accept", "application/vnd.github+json")
         .header("User-Agent", "GitSync")
         .send()
         .await
-        .map_err(|e| format!("获取用户信息失败: {e}"))?;
+    {
+        Ok(response) => response,
+        Err(e) => {
+            return Ok(GithubLoginOutcome::AccountUnavailable {
+                message: describe_request_error(&e),
+            })
+        }
+    };
 
     if !user_resp.status().is_success() {
-        return Err("获取用户信息失败".to_string());
+        return Ok(GithubLoginOutcome::AccountUnavailable {
+            message: format!("HTTP {}", user_resp.status()),
+        });
     }
 
     let account = user_resp
         .json::<GithubAccount>()
         .await
-        .map_err(|e| format!("解析用户信息失败: {e}"))?;
+        .map_err(|e| format!("解析用户信息失败: {}", describe_request_error(&e)))?;
 
-    let mut session = state.device_auth_session.lock().unwrap();
-    if !session.is_active(session_id, &device_code) {
-        return Err("登录请求已取消".to_string());
-    }
-    store_github_token(&token)?;
-    session.active = Some((session_id, device_code, true));
-    Ok(account)
+    Ok(GithubLoginOutcome::Ok { account })
 }
 
 #[tauri::command]
@@ -4882,32 +4951,65 @@ pub fn github_cancel_device_auth(
     Ok(())
 }
 
+#[derive(Debug, Serialize)]
+#[serde(tag = "status", rename_all = "kebab-case")]
+pub enum GithubAccountLookup {
+    Ok { account: GithubAccount },
+    NoToken,
+    Unauthorized,
+    KeychainUnavailable { message: String },
+    NetworkUnavailable { message: String },
+    RequestFailed { message: String },
+}
+
+/// 读取当前 GitHub 账号。
+///
+/// 返回结构化状态而不是 `Err`，因为「没有凭据」「凭据失效」「连不上 GitHub」对用户
+/// 是三件不同的事：只有前两种该显示成未登录，第三种必须保留已登录状态并提示网络或
+/// 代理问题，而不是把用户推去重新走一遍授权。
 #[tauri::command]
-pub async fn github_get_account(state: State<'_, AppState>) -> Result<GithubAccount, String> {
-    let token = get_github_token()?;
+pub async fn github_get_account(state: State<'_, AppState>) -> Result<GithubAccountLookup, String> {
+    let token = match read_github_token() {
+        Ok(Some(token)) => token,
+        Ok(None) => return Ok(GithubAccountLookup::NoToken),
+        Err(message) => return Ok(GithubAccountLookup::KeychainUnavailable { message }),
+    };
     let client = &state.http_client;
 
-    let resp = client
-        .get("https://api.github.com/user")
+    let resp = match client
+        .get(GITHUB_API_USER_URL)
         .header("Authorization", format!("Bearer {}", &token))
         .header("Accept", "application/vnd.github+json")
         .header("User-Agent", "GitSync")
         .send()
         .await
-        .map_err(|e| format!("请求失败: {e}"))?;
+    {
+        Ok(response) => response,
+        Err(e) => {
+            return Ok(GithubAccountLookup::NetworkUnavailable {
+                message: describe_request_error(&e),
+            })
+        }
+    };
 
     if resp.status() == reqwest::StatusCode::UNAUTHORIZED {
         let _ = delete_github_token();
-        return Err("登录已过期，请重新登录 GitHub".to_string());
+        return Ok(GithubAccountLookup::Unauthorized);
     }
     if !resp.status().is_success() {
+        let status = resp.status();
         let body = resp.text().await.unwrap_or_default();
-        return Err(format!("获取用户信息失败: {}", body));
+        return Ok(GithubAccountLookup::RequestFailed {
+            message: format!("HTTP {status}: {body}"),
+        });
     }
 
-    resp.json::<GithubAccount>()
-        .await
-        .map_err(|e| format!("解析响应失败: {e}"))
+    match resp.json::<GithubAccount>().await {
+        Ok(account) => Ok(GithubAccountLookup::Ok { account }),
+        Err(e) => Ok(GithubAccountLookup::RequestFailed {
+            message: format!("解析响应失败: {}", describe_request_error(&e)),
+        }),
+    }
 }
 
 #[tauri::command]
@@ -4988,7 +5090,7 @@ pub async fn github_get_repos(
         .header("User-Agent", "GitSync")
         .send()
         .await
-        .map_err(|e| format!("请求仓库列表失败: {e}"))?;
+        .map_err(|e| format!("请求仓库列表失败: {}", describe_request_error(&e)))?;
 
     if resp.status() == reqwest::StatusCode::UNAUTHORIZED {
         let _ = delete_github_token();
@@ -5003,7 +5105,7 @@ pub async fn github_get_repos(
 
     resp.json::<Vec<GithubRepo>>()
         .await
-        .map_err(|e| format!("解析仓库列表失败: {e}"))
+        .map_err(|e| format!("解析仓库列表失败: {}", describe_request_error(&e)))
 }
 
 #[cfg(test)]

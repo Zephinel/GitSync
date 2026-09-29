@@ -6710,6 +6710,18 @@ function CommitHistoryDrawer({
 
 // ==================== 主应用 ====================
 
+// 「连不上 GitHub」和「没登录」必须给用户不同的出路：前者要保留凭据并提示网络/代理，
+// 后者才该走登录流程。设置页的登录按钮与导入菜单的「GitHub 仓库」共用这段文案。
+function buildGithubConnectivityNotice(restored) {
+  const detail = restored?.message ? `：${restored.message}` : ''
+  return {
+    title: '无法连接 GitHub',
+    message:
+      `读取 GitHub 账号失败${detail}\n\n` +
+      '你的登录凭据仍然保存在钥匙串中。如果正在使用代理或 VPN，请确认 api.github.com 可访问后重试。',
+  }
+}
+
 function App() {
   const [page, setPage] = useState('dashboard')
   const [repos, setRepos] = useState([])
@@ -7050,24 +7062,46 @@ function App() {
 
   const restoreGithubAccountOnDemand = useCallback(async () => {
     try {
-      const account = await invoke('github_get_account')
-      if (account && account.login) {
-        setGithubAccount(account)
-        return account
+      const result = await invoke('github_get_account')
+      const status = result?.status
+      if (status === 'ok' && result.account?.login) {
+        setGithubAccount(result.account)
+        return { account: result.account }
       }
-    } catch {
-      // Avoid touching Keychain during normal app startup; failed lazy restore falls back to login.
+      if (status === 'no-token' || status === 'unauthorized') {
+        setGithubAccount(null)
+        return { reason: status }
+      }
+      // 钥匙串读不到、网络不可达、GitHub 返回异常：这些都不是「未登录」。
+      // 不清空已登录状态，也不要把用户推去重新走一遍授权，只记录原因交给调用方提示。
+      const message = result?.message || '未知错误'
+      appendAppErrorLogEntries([{
+        scope: 'github-login',
+        message: `读取 GitHub 账号失败（${status || 'unknown'}）：${message}`,
+      }])
+      return { reason: status || 'unknown', message }
+    } catch (e) {
+      const message = String(e?.message ?? e)
+      appendAppErrorLogEntries([{
+        scope: 'github-login',
+        message: `读取 GitHub 账号失败：${message}`,
+      }])
+      return { reason: 'invoke-failed', message }
     }
-    return null
   }, [])
 
   const handleGithubLogin = useCallback(async () => {
-    const restoredAccount = await restoreGithubAccountOnDemand()
-    if (restoredAccount) {
+    const restored = await restoreGithubAccountOnDemand()
+    if (restored?.account) {
       if (pendingGithubRepoBrowserOpenRef.current) {
         pendingGithubRepoBrowserOpenRef.current = false
         setGithubRepoBrowserOpen(true)
       }
+      return
+    }
+    if (restored && restored.reason !== 'no-token' && restored.reason !== 'unauthorized') {
+      // 连不上/读不到 ≠ 未登录：凭据还在，只提示问题，不把用户推去重新授权。
+      setNoticeData(buildGithubConnectivityNotice(restored))
       return
     }
     pendingGithubRepoBrowserOpenRef.current = true
@@ -9535,8 +9569,12 @@ function App() {
     closeImportEntryMenu()
     if (isRepoImportBusy) return
     if (!githubAccount) {
-      const restoredAccount = await restoreGithubAccountOnDemand()
-      if (!restoredAccount) {
+      const restored = await restoreGithubAccountOnDemand()
+      if (!restored?.account) {
+        if (restored && restored.reason !== 'no-token' && restored.reason !== 'unauthorized') {
+          setNoticeData(buildGithubConnectivityNotice(restored))
+          return
+        }
         pendingGithubRepoBrowserOpenRef.current = true
         setPage('settings')
         return
