@@ -418,7 +418,29 @@ npm run tauri dev
 
 # 构建生产版本
 npm run tauri build
+
+# 静态检查（no-undef / no-use-before-define）
+npm run lint
 ```
+
+### 发版前必须同步的版本相关位置
+
+推 `v*` tag 会触发 `.github/workflows/release-on-tag.yml`，它会逐个校验，漏一处就失败：
+
+1. `package.json` 的 `version`
+2. `package-lock.json`（顶层与 `packages[""]`）
+3. `src-tauri/tauri.conf.json` 的 `version`（CI 以它为准推导期望 tag 名）
+4. `src-tauri/Cargo.toml` 的 `version`
+5. `src-tauri/Cargo.lock` 里 `name = "git-sync"` 那条的 `version`
+6. `CHANGELOG.md` 新增 `## <version> (<YYYY-MM-DD>)` 条目
+7. **`src/releaseMetadata.js` 的 `RELEASE_DATE`** —— 设置页「关于」显示的就是它。
+   它**不会**跟着版本号自动更新（版本号是运行时从二进制读的），漏改就会出现
+   「新版本号 + 旧日期」这种显示。`releaseMetadata.test.js` 有一条漂移护栏，
+   从 `CHANGELOG.md` 读出当前版本对应条目的日期与本常量比对，只改一处会失败。
+
+> 注意：`tauri.conf.json` 同时是**开发构建**的版本号来源。发版 bump 之后，
+> 本地 `tauri dev` 构建会认为自己是刚发布的那个版本，因此在下一个版本号出现前
+> 无法用它测试「检查更新」流程——要测更新得用已安装的旧版正式包。
 
 ---
 

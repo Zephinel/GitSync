@@ -288,6 +288,68 @@ test('install success then relaunch failures stay restartRequired and retry only
   assert.equal(h.calls.relaunch, 3)
 })
 
+test('relaunch 的 Promise 永不 settle 时不能把控制器锁死', async () => {
+  /*
+   * 真实事故：relaunch() 的语义是「替换掉当前进程」，所以在多数平台上它的 Promise
+   * 永远不会 resolve。此前 `await relaunch()` 一旦不返回，actionInFlight 就永久停在
+   * true —— 之后每次点击都在入口静默 return，弹窗停在 relaunching 且没有按钮也关不掉。
+   * 用户看到的就是「点很多次都没反应，直到某一刻应用突然退出并装好」。
+   */
+  const neverSettles = new Promise(() => {})
+  let relaunchCalls = 0
+  const h = createHarness({
+    relaunch: () => { relaunchCalls += 1; return neverSettles },
+    relaunchTimeoutMs: 5,
+  })
+  const update = createUpdate()
+  h.updates.push(update)
+  const check = h.controller.check()
+  await settle()
+  update.calls.progress({ event: 'Finished' })
+  await check
+  assert.equal(h.controller.getState().phase, 'ready')
+
+  const install = h.controller.installOrRestart()
+  assert.equal(h.controller.getState().phase, 'preparing')
+  await install
+
+  // 进程没退掉：必须回到可重试状态，而不是停在 relaunching。
+  const afterTimeout = h.controller.getState()
+  assert.equal(afterTimeout.phase, 'restartRequired')
+  assert.match(afterTimeout.error, /未能自动重新启动/)
+  assert.equal(h.controller.isPromptVisible(), true)
+
+  // 关键：控制器没有被锁死，再次点击能真的重试 relaunch。
+  assert.equal(relaunchCalls, 1)
+  await h.controller.installOrRestart()
+  await settle()
+  assert.equal(relaunchCalls, 2, '必须还能重试 relaunch，而不是静默 return')
+
+  // restartRequired 阶段也必须是可关闭的，否则用户会被困在弹窗里。
+  h.controller.dismiss()
+  assert.equal(h.controller.isPromptVisible(), false)
+})
+
+test('relaunch 正常返回（进程未替换）也回到可重试状态', async () => {
+  let relaunchCalls = 0
+  const h = createHarness({ relaunch: async () => { relaunchCalls += 1 } })
+  const update = createUpdate()
+  h.updates.push(update)
+  const check = h.controller.check()
+  await settle()
+  update.calls.progress({ event: 'Finished' })
+  await check
+
+  await h.controller.installOrRestart()
+  const state = h.controller.getState()
+  assert.equal(state.phase, 'restartRequired')
+  assert.match(state.error, /未能自动重新启动/)
+
+  await h.controller.installOrRestart()
+  await settle()
+  assert.equal(relaunchCalls, 2)
+})
+
 test('busy restart authority blocks both install and relaunch', async () => {
   const h = createHarness()
   h.setGuardResult({ acquired: false, blockers: ['pull in progress'] })

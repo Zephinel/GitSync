@@ -26,12 +26,53 @@ function errorText(error) {
   return error instanceof Error ? error.message : String(error || '未知错误')
 }
 
+/*
+ * relaunch() 的语义是「替换掉当前进程」，所以在多数平台上它的 Promise
+ * **永远不会 resolve**（进程直接被替换）。此前 `await relaunch()` 一旦不返回，
+ * `actionInFlight` 就被永久卡在 true：之后每次点击都在入口静默 return，
+ * 弹窗停在 relaunching 且没有按钮、也关不掉——表现就是「点很多次都没反应，
+ * 直到某一刻应用突然退出并装好」。
+ *
+ * 所以这里改成有界等待：进程按预期退掉时这个 Promise 永远不 settle（无所谓，
+ * 进程都没了）；只有「进程还活着」才会走到超时分支，那就必须把状态解开，
+ * 让用户能重试，而不是把界面锁死。
+ */
+const RELAUNCH_SETTLE_TIMEOUT_MS = 15000
+
+function relaunchWithDeadline(relaunch, timeoutMs) {
+  return new Promise((resolve) => {
+    let settled = false
+    const timer = setTimeout(() => {
+      if (settled) return
+      settled = true
+      resolve('timeout')
+    }, timeoutMs)
+    Promise.resolve()
+      .then(() => relaunch())
+      .then(
+        () => {
+          if (settled) return
+          settled = true
+          clearTimeout(timer)
+          resolve('resolved')
+        },
+        (error) => {
+          if (settled) return
+          settled = true
+          clearTimeout(timer)
+          resolve(error)
+        },
+      )
+  })
+}
+
 export function createAppUpdaterController({
   checkForUpdate,
   relaunch,
   acquireRestartGuard,
   releaseRestartGuard,
   getRestartBlockers = () => [],
+  relaunchTimeoutMs = RELAUNCH_SETTLE_TIMEOUT_MS,
   onRestartIntent = () => {},
   onStateChange = () => {},
   onManualCurrent = () => {},
@@ -253,11 +294,16 @@ export function createAppUpdaterController({
 
       publish({ phase: APP_UPDATE_PHASE.relaunching, error: '', dismissed: false })
       if (installedOwner) await disposeOwner(installedOwner)
-      try {
-        await relaunch()
-        keepGuard = true
-      } catch (error) {
-        setError(APP_UPDATE_PHASE.restartRequired, error)
+      const outcome = await relaunchWithDeadline(relaunch, relaunchTimeoutMs)
+      if (outcome === 'timeout') {
+        // 进程还活着说明重启没发生；必须退回可重试状态，否则界面会永久锁死。
+        setError(APP_UPDATE_PHASE.restartRequired, 'GitSync 未能自动重新启动，请点击重新启动，或手动退出后重新打开。')
+      } else if (outcome !== 'resolved') {
+        setError(APP_UPDATE_PHASE.restartRequired, outcome)
+      } else {
+        // 重启调用正常返回且进程没有立刻消失：同样交回给用户决定是否重试。
+        keepGuard = false
+        setError(APP_UPDATE_PHASE.restartRequired, 'GitSync 未能自动重新启动，请点击重新启动，或手动退出后重新打开。')
       }
     } catch (error) {
       if (state.phase === APP_UPDATE_PHASE.installing) {
