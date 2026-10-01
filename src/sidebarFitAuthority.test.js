@@ -62,9 +62,12 @@ test('窄屏收起侧边栏的接线：测量、类名、按钮与动画都在',
   assert.match(appSource, /shouldCollapseSidebar\(\{/)
 
   // 收起状态：类名、侧边栏让位、提交历史不重复位移
-  assert.match(appSource, /const sidebarCollapsed = toolbarNeedsCollapse && sidebarOverride !== 'open'/)
-  assert.match(appSource, /sidebarCollapsed \? 'app-layout--sidebar-collapsed' : ''/)
-  assert.match(appSource, /collapsed=\{sidebarCollapsed\}/)
+  // 可见性与栅格列占用交给 sidebarCardState 的纯函数；这里只保证接线在，
+  // 行为本身由 resolveSidebarPanelLayout 的专项测试覆盖。
+  assert.match(appSource, /visible: sidebarVisible, columnCollapsed: sidebarColumnCollapsed/)
+  assert.ok(appSource.includes("preference: sidebarPreference"))
+  assert.ok(appSource.includes("sidebarColumnCollapsed ? 'app-layout--sidebar-collapsed' : ''"))
+  assert.match(appSource, /collapsed=\{!sidebarVisible\}/)
   assert.match(appSource, /interactive && !collapsed \? undefined : 'true'/)
   assert.match(cssSource, /\.app-layout--sidebar-collapsed \{[\s\S]*?grid-template-columns:\s*0 minmax\(0, 1fr\);/)
   assert.match(cssSource, /\.app-layout--sidebar-collapsed\.app-layout--commit-history-open \.main-content \{[\s\S]*?transform:\s*none;/)
@@ -77,16 +80,24 @@ test('窄屏收起侧边栏的接线：测量、类名、按钮与动画都在',
   assert.match(cssSource, /transform var\(--sidebar-slide-duration\) var\(--sidebar-slide-ease\),/)
   assert.match(
     cssSource,
-    /@media \(prefers-reduced-motion: reduce\) \{\s*\.app-layout,\s*\.sidebar \{\s*transition-duration: 1ms;/
+    /@media \(prefers-reduced-motion: reduce\) \{\s*\.app-layout,\s*\.app-layout--sidebar-card,\s*\.sidebar,\s*\.app-layout--sidebar-docking \.sidebar \{\s*transition-duration: 1ms;/
   )
 
-  // 左上角按钮：只在该收起的宽度出现，带可访问名称与 aria-controls
+  // 顶栏左上角按钮：只在面板当前不可见时出现（宽屏手动收起后也用它展开），
+  // 带可访问名称与 aria-controls。展开态下的收起入口在侧边栏自己的品牌行里。
   assert.match(
     appSource,
-    /\{toolbarNeedsCollapse \? \([\s\S]*?className="dashboard-toolbar__sidebar-toggle"/
+    /\{sidebarVisible \? null : \([\s\S]*?className="dashboard-toolbar__sidebar-toggle"/
   )
-  assert.match(appSource, /aria-controls="app-sidebar"/)
-  assert.match(appSource, /id="app-sidebar"/)
+  assert.match(
+    appSource,
+    /className="sidebar__collapse-btn"[\s\S]*?aria-label="收起侧边栏"/
+  )
+  assert.match(appSource, /onToggle=\{handleToggleSidebar\}/)
+  assert.match(cssSource, /\.sidebar__collapse-btn \{[\s\S]*?width:\s*36px;[\s\S]*?height:\s*36px;[\s\S]*?border-radius:\s*var\(--radius-md\);/)
+  assert.match(cssSource, /\.sidebar__collapse-btn \{[\s\S]*?margin-left:\s*auto;/)
+  assert.ok(appSource.includes('aria-controls="app-sidebar"'))
+  assert.ok(appSource.includes('id="app-sidebar"'))
   assert.match(registrySource, /sidebarPanel: SidebarPanelIcon,/)
 
   // 形状与同排按钮一致：36×36 与 --radius-md（少了圆角会变成直角方块）

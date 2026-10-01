@@ -33,3 +33,6 @@ github_client_id
 release-assets/
 scripts/updater-signature-verifier/target/
 .pi-subagents/
+
+# npm 缓存（绕过 ~/.npm 在 macOS 上的 EPERM）
+.npm-cache

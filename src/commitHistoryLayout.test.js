@@ -377,7 +377,7 @@ test('commit history close keeps the source card hidden until the returning hero
   )
   assert.match(
     appSource,
-    /className="sidebar"[\s\S]*?aria-hidden=\{interactive \? undefined : 'true'\}[\s\S]*?inert=\{interactive \? undefined : true\}/,
+    /className=\{sidebarClassName\}[\s\S]*?aria-hidden=\{interactive \? undefined : 'true'\}[\s\S]*?inert=\{interactive \? undefined : true\}/,
     'the hidden sidebar should not retain keyboard ownership behind the history surface'
   )
   assert.match(

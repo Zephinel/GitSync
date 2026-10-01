@@ -37,7 +37,22 @@ import {
 } from './dashboardEmptyProjection.js'
 import { shouldCollapseSidebar } from './sidebarFitAuthority.js'
 import {
-  buildDashboardRows,
+  SIDEBAR_CARD_DOCK_FALLBACK_MS,
+  resolveSidebarCardRect,
+} from './sidebarCardAuthority.js'
+import {
+  SIDEBAR_PANEL_PREFERENCE,
+  isSidebarCardDocking,
+  isSidebarCardFloating,
+  isSidebarCardOpen,
+  readSidebarPanelPreference,
+  resolveSidebarCardMode,
+  resolveSidebarCardTransition,
+  resolveSidebarPanelLayout,
+  writeSidebarPanelPreference,
+} from './sidebarCardState.js'
+import {
+  buildDashboardColumns,
   normalizeDashboardLayout,
 } from './dashboardLayoutUtils.js'
 import { parseGitCommitDateToMs, formatGitCommitLocalTime } from './gitDateUtils.js'
@@ -2077,6 +2092,138 @@ function DashboardFilterEmptyState({ filterMode, resolvedTheme }) {
   )
 }
 
+/*
+ * 窄屏下侧边栏的悬浮卡片形态。
+ *
+ * 打开：面板变成一张浮在仪表盘之上的圆角卡片，贴着左边缘从屏幕外推进来；
+ * 收起：镜像退回边缘之外（位移量是整张卡片宽度加上左边距）。
+ * 窗口再次变宽：卸掉浮层类，让卡片跟着栅格第一列一起从 0 长回 240px，
+ * 同时位移归零——动画结束那一刻正好与列边界重合，所以切回同一图层不会跳。
+ */
+function useFloatingSidebarCard({
+  enabled,
+  isOpen,
+  isDocked,
+  isCommitHistoryOpen,
+  isSidebarActive,
+  onRequestClose,
+}) {
+  // 唯一的真状态：这一次变宽是否要走「滑回栅格列」的回位动画。
+  const [shouldDock, setShouldDock] = useState(false)
+  // 上一次渲染结束时的 enable/open 边沿。只在 effect 里写，渲染期保持纯净
+  // （StrictMode 会把渲染跑两遍，渲染期写 ref / setState 会被重复应用）。
+  // 初值取首帧输入：否则首帧会被当成一次「变宽」，在启动时误播回位动画。
+  const initialTransitionRef = useRef(null)
+  if (initialTransitionRef.current === null) {
+    initialTransitionRef.current = { wasEnabled: enabled, wasOpen: enabled && isOpen && !isDocked }
+  }
+  const wasEnabledRef = useRef(initialTransitionRef.current.wasEnabled)
+  const wasOpenRef = useRef(initialTransitionRef.current.wasOpen)
+  const dockSessionRef = useRef(false)
+
+  useEffect(() => {
+    // 判定走纯函数，effect 只负责读写边沿与控制状态。
+    const transition = resolveSidebarCardTransition(
+      { wasEnabled: wasEnabledRef.current, wasOpen: wasOpenRef.current },
+      { enabled, isOpen, isDocked }
+    )
+    wasEnabledRef.current = transition.wasEnabled
+    wasOpenRef.current = transition.wasOpen
+
+    if (isDocked) {
+      // 宽度够了：面板已经回收进栅格列，这次回位会话到此结束。
+      // 少了这一句，回位动画结束的那一帧会倒回「收在屏幕外」。
+      if (dockSessionRef.current) {
+        dockSessionRef.current = false
+        setShouldDock(false)
+      }
+      return
+    }
+
+    if (transition.shouldStartDocking) {
+      if (!dockSessionRef.current) {
+        dockSessionRef.current = true
+        setShouldDock(true)
+      }
+      return
+    }
+
+    // 回位中途又变窄：立刻中止，否则栅格列会一直停在「还给栅格」那一档。
+    if (dockSessionRef.current) {
+      dockSessionRef.current = false
+      setShouldDock(false)
+    }
+  }, [enabled, isOpen, isDocked])
+
+  const mode = resolveSidebarCardMode({ enabled, isOpen, isDocked, isDocking: shouldDock })
+  const isFloating = isSidebarCardFloating(mode)
+  const isCardVisible = isSidebarCardOpen(mode) && isSidebarActive
+  const isCardBackdropVisible = isCardVisible && !isCommitHistoryOpen
+
+  // 回位动画的结束以真实的过渡事件为准，`SIDEBAR_CARD_DOCK_FALLBACK_MS` 只是兜底：
+  // 元素被卸载、`prefers-reduced-motion` 把过渡压到 1ms、或者过渡压根没触发时，
+  // 状态都必须能自己收敛，不能把「动画结束」这件事只押在 JS 这边的时长上。
+  useEffect(() => {
+    if (!shouldDock) return undefined
+    // 直接查 DOM：侧边栏的 id 是稳定的唯一入口（App 有 id="app-sidebar"）。
+    // 这里不能再引入 ref —— 它的声明在 hook 作用域内，App 的 JSX 拿不到，
+    // 之前那样写会让 current 永远是 undefined，transitionend 等于没接。
+    const sidebar = document.getElementById('app-sidebar')
+    let finished = false
+    const finish = () => {
+      if (finished) return
+      finished = true
+      setShouldDock(false)
+    }
+    const handleTransitionEnd = (event) => {
+      if (event.target !== sidebar) return
+      if (event.propertyName !== 'transform') return
+      finish()
+    }
+    sidebar?.addEventListener('transitionend', handleTransitionEnd)
+    const fallbackTimer = setTimeout(finish, SIDEBAR_CARD_DOCK_FALLBACK_MS)
+    return () => {
+      sidebar?.removeEventListener('transitionend', handleTransitionEnd)
+      clearTimeout(fallbackTimer)
+    }
+  }, [shouldDock])
+
+  // 卡片展开时把圆角与四周留白交给 CSS 变量，退场时再交还给 CSS 里的断点值。
+  useLayoutEffect(() => {
+    if (!isFloating) return undefined
+    const card = resolveSidebarCardRect()
+    const root = document.documentElement
+    const properties = {
+      '--sidebar-card-inset': `${card.inset}px`,
+      '--sidebar-card-radius': `${card.radius}px`,
+      '--sidebar-card-z-index': String(card.zIndex),
+      '--sidebar-card-edge-right': `${card.edgeRight}px`,
+      '--sidebar-card-edge-bottom': `${card.edgeRight}px`,
+    }
+    Object.entries(properties).forEach(([name, value]) => root.style.setProperty(name, value))
+    return () => {
+      Object.keys(properties).forEach((name) => root.style.removeProperty(name))
+    }
+  }, [isFloating])
+
+  // 卡片浮在仪表盘上时，Esc 与点击卡片外部都收起，和抽屉的关闭手势保持一致。
+  useEffect(() => {
+    if (!isCardBackdropVisible) return undefined
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') onRequestClose()
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [isCardBackdropVisible, onRequestClose])
+
+  return {
+    isFloating,
+    isDocking: isSidebarCardDocking(mode),
+    isCardVisible,
+    isCardBackdropVisible,
+  }
+}
+
 function Sidebar({
   currentPage,
   onNavigate,
@@ -2093,6 +2240,10 @@ function Sidebar({
   canRevealFailedSync,
   interactive = true,
   collapsed = false,
+  floating = false,
+  open = false,
+  docking = false,
+  onToggle,
 }) {
   const [showHoverSyncActions, setShowHoverSyncActions] = useState(false)
   const revealTimerRef = useRef(null)
@@ -2164,11 +2315,17 @@ function Sidebar({
   }, [])
 
   const failedButtonLabel = `同步失败仓库（${failedRepoCount}）`
+  const sidebarClassName = [
+    'sidebar',
+    floating ? 'sidebar--card' : '',
+    floating && open ? 'sidebar--card-open' : '',
+    docking ? 'sidebar--card-docking' : '',
+  ].filter(Boolean).join(' ')
 
   return (
     <div
       id="app-sidebar"
-      className="sidebar"
+      className={sidebarClassName}
       aria-hidden={interactive && !collapsed ? undefined : 'true'}
       inert={interactive && !collapsed ? undefined : true}
       onMouseEnter={handleSidebarMouseEnter}
@@ -2176,7 +2333,22 @@ function Sidebar({
     >
       <div className="sidebar__brand">
         <img src={brandIcon} alt="" aria-hidden="true" className="sidebar__brand-logo" />
-        GitSync
+        <span className="sidebar__brand-name">GitSync</span>
+        {/* `collapsed` 表示面板收在屏幕外（浮层形态），那种状态它只是透明但
+            仍然可聚焦，所以用 interactive 而不是 !collapsed 作为渲染条件。 */}
+        {onToggle && interactive ? (
+          <button
+            type="button"
+            className="sidebar__collapse-btn"
+            onClick={onToggle}
+            aria-label="收起侧边栏"
+            aria-expanded
+            aria-controls="app-sidebar"
+            data-app-tooltip="收起侧边栏"
+          >
+            <Icons.sidebarPanel className="icon icon--sm" />
+          </button>
+        ) : null}
       </div>
 
       <div className="sidebar__stats">
@@ -4650,8 +4822,10 @@ function DashboardGroupEntries({
     if (collapseTimerRef.current) clearTimeout(collapseTimerRef.current)
   }, [])
 
-  const repoRows = useMemo(
-    () => (shouldRenderContent ? buildDashboardRows(group.repos, dashboardLayout, repoGridColumns) : []),
+  // 卡片布局按 `index % 列数` 保序分发到列容器；列容器是 flex column，
+  // 卡片高度才由各自内容决定（等宽行 + grid 会把同一行拉齐，瀑布流就没了）。
+  const repoColumns = useMemo(
+    () => (shouldRenderContent ? buildDashboardColumns(group.repos, dashboardLayout, repoGridColumns) : []),
     [dashboardLayout, group.repos, repoGridColumns, shouldRenderContent]
   )
 
@@ -4665,13 +4839,10 @@ function DashboardGroupEntries({
   return (
     <div className={entriesWrapClassName} aria-hidden={isCollapsed}>
       <div className="dashboard-group__entries">
-        <div
-          className={`repo-grid repo-grid--${dashboardLayout}`}
-          style={{ '--repo-grid-column-count': repoGridColumns }}
-        >
-          {repoRows.map((row, rowIndex) => (
-            <div className="repo-grid__row" key={group.key + '-repo-row-' + rowIndex}>
-              {row.map((item) => (
+        <div className={`repo-grid repo-grid--${dashboardLayout}`}>
+          {repoColumns.map((column, columnIndex) => (
+            <div className="repo-grid__column" key={group.key + '-repo-column-' + columnIndex}>
+              {column.map((item) => (
                 <MemoizedRepoCard
                   key={item.id}
                   repo={item}
@@ -6755,8 +6926,12 @@ function App() {
   const [importResultData, setImportResultData] = useState(null)
   const [importLoadingData, setImportLoadingData] = useState(null)
   const [importMenuAnchor, setImportMenuAnchor] = useState(null)
-  // 窄屏下侧边栏的自动收起：override 记录用户在本次会话里的手动选择（null 表示跟随自动判定）。
-  const [sidebarOverride, setSidebarOverride] = useState(null)
+  /*
+   * 侧边栏的开合是**持久偏好**，不是窗口宽度的函数：宽度只决定「用户还没表过态」时
+   * 的默认值；一旦按下过收起/展开就写进 localStorage，之后调整窗口尺寸不再改变它。
+   * 空字符串表示还没有偏好。
+   */
+  const [sidebarPreference, setSidebarPreference] = useState(() => readSidebarPanelPreference())
   const [toolbarNeedsCollapse, setToolbarNeedsCollapse] = useState(false)
   const [cloneDialogOpen, setCloneDialogOpen] = useState(false)
   const [isCloningRepo, setIsCloningRepo] = useState(false)
@@ -7925,9 +8100,27 @@ function App() {
     }))
   }, [])
 
+  // 顶栏那个开关按钮：窄屏走浮层形态，宽屏走「让不让出这一列」。
+  // 两条路径分开是因为它们的落点不同（浮层 vs 栅格列），动画也不一样。
+  // 侧边栏右上角的收起、顶栏左上角的展开，是同一件事：翻转并持久化这个偏好。
+  // 形态（浮层 vs 栅格列）仍由宽度决定，但**开合本身不再由宽度决定**。
   const handleToggleSidebar = useCallback(() => {
-    setSidebarOverride((previous) => (previous === 'open' ? 'closed' : 'open'))
-  }, [])
+    setSidebarPreference((previous) => {
+      // 默认值与 resolveSidebarPanelLayout 必须一致：没有偏好时是「展开」。
+      const isVisible = previous
+        ? previous === SIDEBAR_PANEL_PREFERENCE.expanded
+        : true
+      return isVisible
+        ? SIDEBAR_PANEL_PREFERENCE.collapsed
+        : SIDEBAR_PANEL_PREFERENCE.expanded
+    })
+  }, [toolbarNeedsCollapse])
+
+  useEffect(() => {
+    // 离开仪表盘时不再动开合偏好（那是跨会话的持久选择），只清掉导入菜单这类瞬时状态。
+    if (page === 'dashboard') return
+    setImportMenuAnchor(null)
+  }, [page])
 
   useEffect(() => {
     if (page !== 'dashboard' || !appReady) {
@@ -7959,9 +8152,9 @@ function App() {
   }, [measureToolbarFit])
 
   useEffect(() => {
-    // 宽到一行放得下时清掉窄屏下的手动选择，回到自动判定。
-    if (!toolbarNeedsCollapse) setSidebarOverride(null)
-  }, [toolbarNeedsCollapse])
+    // 偏好一旦变化就落盘；空字符串会清掉这一项（回到「跟随宽度」）。
+    writeSidebarPanelPreference(sidebarPreference)
+  }, [sidebarPreference])
 
   useEffect(() => {
     if (typeof window === 'undefined' || typeof document === 'undefined') return undefined
@@ -11085,14 +11278,57 @@ function App() {
   )
     ? commitHistoryBranchOverviewState.error
     : ''
-  // 自动收起 + 本次会话里的手动覆盖：手动展开后即使仍然很窄也保持展开（顶栏在那种情况下会换行）。
-  const sidebarCollapsed = toolbarNeedsCollapse && sidebarOverride !== 'open'
+  // 展开态的判定必须先于浮层形态：浮层形态要用它决定「卡片进不进场」。
+  const sidebarVisibleFromPreference = sidebarPreference
+    ? sidebarPreference === SIDEBAR_PANEL_PREFERENCE.expanded
+    : !toolbarNeedsCollapse
+  const sidebarCardRequested = toolbarNeedsCollapse && sidebarVisibleFromPreference
+  // 点卡片外部 / Esc：这是一次显式的「我要收起」，所以写进持久偏好。
+  const closeSidebarCard = useCallback(() => {
+    setSidebarPreference(SIDEBAR_PANEL_PREFERENCE.collapsed)
+  }, [])
+  // 窄屏展开时侧边栏是浮在仪表盘上的卡片；宽到一列放得下就滑回它原来的栅格列。
+  const {
+    isFloating: sidebarCardFloating,
+    isDocking: sidebarCardDocking,
+    isCardVisible: sidebarCardOpen,
+    isCardBackdropVisible: sidebarCardBackdropOpen,
+  } = useFloatingSidebarCard({
+    enabled: toolbarNeedsCollapse,
+    isOpen: sidebarCardRequested,
+    isDocked: !toolbarNeedsCollapse,
+    isCommitHistoryOpen: isCommitHistoryDrawerOpen,
+    isSidebarActive: !isCommitHistoryDrawerOpen,
+    onRequestClose: closeSidebarCard,
+  })
+  const sidebarCardMode = sidebarCardFloating || sidebarCardDocking
+  // 可见性与栅格列占用都来自 sidebarCardState 的纯函数（宽度与偏好在竞争，单独测）。
+  const { visible: sidebarVisible, columnCollapsed: sidebarColumnCollapsed } = resolveSidebarPanelLayout({
+    toolbarNeedsCollapse,
+    preference: sidebarPreference,
+    isCardFloating: sidebarCardFloating,
+    isCardDocking: sidebarCardDocking,
+  })
   const appLayoutClassName = [
     'app-layout',
-    sidebarCollapsed ? 'app-layout--sidebar-collapsed' : '',
+    sidebarColumnCollapsed ? 'app-layout--sidebar-collapsed' : '',
+    sidebarCardDocking ? 'app-layout--sidebar-docking' : '',
+    sidebarCardMode ? 'app-layout--sidebar-card' : '',
+    sidebarCardOpen ? 'app-layout--sidebar-card-open' : '',
+    sidebarCardDocking ? 'app-layout--sidebar-card-docking' : '',
     isCommitHistoryDrawerOpen ? 'app-layout--commit-history-session' : '',
     isCommitHistoryLayoutOpen ? 'app-layout--commit-history-open' : '',
   ].filter(Boolean).join(' ')
+
+  // 必须放在 sidebarCardMode / sidebarCardDocking 之后：effect 的依赖数组在渲染期
+  // 就会求值，提前引用会直接踩中 TDZ。
+  useEffect(() => {
+    // 卡片形态需要根节点裁剪溢出的部分，否则滑出边缘时会短暂撑出横向滚动条。
+    // 回位动画同样在移动这张卡片，也一并裁掉。
+    const root = document.documentElement
+    root.classList.toggle('sidebar-card-mode', sidebarCardMode || sidebarCardDocking)
+    return () => root.classList.remove('sidebar-card-mode')
+  }, [sidebarCardMode, sidebarCardDocking])
   const dashboardShellClassName = [
     'dashboard-shell',
     dashboardEmptyProjection.kind === DASHBOARD_EMPTY_PROJECTION_KIND.filter ? 'dashboard-shell--filter-empty' : '',
@@ -11234,8 +11470,20 @@ function App() {
         failedRepoCount={failedRepoCount}
         canRevealFailedSync={!hasActiveSyncJobs}
         interactive={!isCommitHistoryDrawerOpen}
-        collapsed={sidebarCollapsed}
+        collapsed={!sidebarVisible}
+        floating={sidebarCardMode}
+        open={sidebarCardOpen}
+        docking={sidebarCardDocking}
+        onToggle={handleToggleSidebar}
       />
+      {sidebarCardBackdropOpen ? (
+        <button
+          type="button"
+          className="sidebar-card-backdrop"
+          aria-label="收起侧边栏"
+          onClick={closeSidebarCard}
+        />
+      ) : null}
       <main
         className="main-content"
         aria-hidden={isCommitHistoryDrawerOpen ? 'true' : undefined}
@@ -11272,19 +11520,19 @@ function App() {
             <div className="dashboard-shell__main">
               <div className="dashboard__header">
               <div className="dashboard__header-actions" ref={dashboardToolbarRowRef}>
-                {toolbarNeedsCollapse ? (
+                {sidebarVisible ? null : (
                   <button
                     type="button"
                     className="dashboard-toolbar__sidebar-toggle"
                     onClick={handleToggleSidebar}
-                    aria-label={sidebarCollapsed ? '展开侧边栏' : '收起侧边栏'}
-                    aria-expanded={!sidebarCollapsed}
+                    aria-label="展开侧边栏"
+                    aria-expanded={false}
                     aria-controls="app-sidebar"
-                    data-app-tooltip={sidebarCollapsed ? '展开侧边栏' : '收起侧边栏'}
+                    data-app-tooltip="展开侧边栏"
                   >
                     <Icons.sidebarPanel className="icon icon--sm" />
                   </button>
-                ) : null}
+                )}
                 <div className="dashboard-toolbar__controls" ref={dashboardToolbarControlsRef}>
                   <div className="dashboard-toolbar__field">
                     <span className="dashboard-toolbar__label">筛选</span>

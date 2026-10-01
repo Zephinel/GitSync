@@ -241,11 +241,21 @@ App (主组件，管理全局状态)
 - `commitAsc` / `commitDesc` 的唯一排序来源是当前分支卡片上的 latest commit `date`（Git `%ai`，含时区）；缺失 commit 时间永远排在有时间仓库之后。
 - `syncAsc` / `syncDesc` 的唯一排序来源是 `getRepoSyncSortTimestamp()`：`max(repo.last_sync_at, latest successful syncHistory.finishedAt)`。两类输入都兼容 legacy seconds 与当前 milliseconds；`failed` / `canceled` history 不参与，时间单位只按结构化 seconds/milliseconds contract 归一化，不依赖当前 wall clock 猜测合法性。branch switch、fetch、status refresh 不更新 `last_sync_at`，只有真正成功的 `sync_repo` 才记录同步完成时间。
 - 所有时间排序的缺失值在 asc/desc 两个方向都永远最后；相同时间按仓库名称再按 id 做确定性回退。名称排序只比较名称/id，不读取时间。
-- 排序与视觉阅读顺序使用同一契约：列表布局每行一个仓库，卡片布局按已排序数组以 row-major（从左到右、从上到下）分行后渲染；布局只是投影，不重新解释排序。历史 persisted value `masonry` 只作为卡片布局兼容 key，当前实现不是 variable-height masonry。
+- 排序与视觉阅读顺序使用同一契约：列表布局每行一个仓库，卡片布局把已排序数组按 `index % 列数` **保序分发到等宽列**（列容器内是 flex column），视觉阅读顺序仍是左到右、上到下；布局只是投影，不重新解释排序。历史 persisted value `masonry` 就是卡片布局本身：卡片高度必须由各自内容决定（variable-height masonry）。**不要**把卡片布局改成「按行切分 + 每行一个 grid」——grid 会把同一行卡片拉到同高，瀑布流会退化成等高网格，`dashboardLayoutUtils.test.js` 里有对应的回归护栏。
 - 卡片主时间会随 active sort mode 标明排序依据：commit sort 显示“提交时间”，sync sort 显示“上次同步”；同步相对时间的 tooltip 同时显示来自同一个最终 sync sort timestamp 的精确本地时间；两种时间保持独立。
 - empty state 的唯一视觉 authority 是 `src/dashboardEmptyStates.js` 中的五态配置与 `src/assets/dashboard-empty-states/{light,dark}/*.webp` 十张资源，文案由 React 渲染。透明 WebP 使用实际 `resolvedTheme` 切换，应用背景保持主要背景 authority。
 - 仓库卡片仍只消费 `get_repo_status` 返回的当前分支状态；远端刷新后，前端额外缓存 `get_repo_branch_overview`，将非当前分支落后与远端新分支投影为卡片内非模态提示，完整分支状态仍由分支悬浮窗展示。
 - 分支写操作必须通过显式按钮触发：卡片提示可处理唯一安全目标，分支悬浮窗提供“切换”“切换并跟踪”“重新绑定”或“取消上游”。分支操作完成后只刷新目标仓库，不会把分支切换计入 `last_sync_at`。
+
+### 侧边栏开合、宽度与形态
+
+侧边栏有三个互相正交的概念，不要把三者混成一个状态（混过一次，代价是卡片一展开就把主区挤窄、顶栏折成两行）：
+
+1. **开合**是跨会话的**持久偏好**，不是窗口宽度的函数。宽度只决定「用户还没表过态」时的默认值（宽屏默认开、窄屏默认收）；一旦按下过收起或展开，这个选择就写进 `localStorage`（`gitsync-sidebar-panel-preference`），之后**调整窗口尺寸不再改变它**。空字符串表示还没有偏好。唯一 authority 是 `sidebarCardState.js` 的 `resolveSidebarPanelLayout()`。
+2. **形态**由宽度决定，与开合无关：顶栏一行放得下时侧边栏在栅格第一列里（与仪表盘同一图层）；放不下时它变成浮在仪表盘之上的圆角卡片（`resolveSidebarCardMode()`）。
+3. **栅格第一列占不占宽度**只看「面板现在是不是浮层 / 有没有被收起」，**不看面板可不可见**。浮层与收起态都让出这一列（分别是「卡片盖住主区」和「主区占满」）；只有回位动画期间把这 240px 还给栅格，好让卡片沿原路径滑回列里。
+
+顶栏左上角的开关与侧边栏品牌行右上角的收起按钮是同一个动作的两个入口：**面板不可见时只有前者，可见时只有后者**，两者不会同时出现。
 
 ### 同步行为模式
 
