@@ -447,6 +447,12 @@ body:has(#root) .action-btn--syncing {
   --app-action-state-shadow:
     var(--app-action-surface-hover-shadow),
     0 0 8px color-mix(in srgb, var(--accent-cyan) 16%, transparent);
+  --app-action-focus-shadow: var(--app-action-current-shadow);
+}
+
+body:has(#root) .action-btn--syncing:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 /* Canceling a sync remains a blue sync action, not a warning state. */
