@@ -8,7 +8,7 @@
  * releaseMetadata.test.js 里有一条漂移护栏：它从 CHANGELOG.md 里读出当前版本
  * 对应条目的日期，和这里比对。发版时只改一处会立刻失败。
  */
-export const RELEASE_DATE = '2026-10-02'
+export const RELEASE_DATE = '2026-10-06'
 
 export const formatReleaseVersion = (version) => {
   const normalizedVersion = typeof version === 'string' ? version.trim() : ''
