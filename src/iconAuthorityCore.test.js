@@ -16,6 +16,7 @@ const APP_ICON_KEYS = [
   'dashboard',
   'settings',
   'sync',
+  'refresh',
   'folder',
   'branch',
   'github',

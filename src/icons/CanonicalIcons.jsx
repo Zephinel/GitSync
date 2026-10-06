@@ -45,6 +45,7 @@ import {
   PAUSE_ICON,
   PLAY_ICON,
   PLUS_ICON,
+  REFRESH_ICON,
   REFRESH_SYNC_ICON,
   REVIEW_ICON,
   SEARCH_ICON,
@@ -112,6 +113,7 @@ export const NavChevronIcon = iconComponent(NAV_CHEVRON_ICON)
 export const PauseIcon = iconComponent(PAUSE_ICON)
 export const PlayIcon = iconComponent(PLAY_ICON)
 export const PlusIcon = iconComponent(PLUS_ICON)
+export const RefreshIcon = iconComponent(REFRESH_ICON)
 export const RefreshSyncIcon = iconComponent(REFRESH_SYNC_ICON)
 export const ReviewIcon = iconComponent(REVIEW_ICON)
 export const SearchIcon = iconComponent(SEARCH_ICON)

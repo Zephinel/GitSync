@@ -11603,9 +11603,9 @@ function App() {
                     aria-label={isFetchingRemote ? '正在获取更新' : '获取更新'}
                   >
                     {isFetchingRemote ? (
-                      <span className="spinning"><Icons.sync className="icon icon--sm" /></span>
+                      <span className="spinning"><Icons.refresh className="icon icon--sm" /></span>
                     ) : (
-                      <Icons.sync className="icon icon--sm" />
+                      <Icons.refresh className="icon icon--sm" />
                     )}
                   </button>
                   <button
